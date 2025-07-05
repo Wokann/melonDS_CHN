@@ -1131,12 +1131,29 @@ u8 CartRetailIR::SPIWrite(u8 val, u32 pos, bool last)
         return 0;
     }
 
-    // TODO: emulate actual IR comm
-
     switch (IRCmd)
     {
     case 0x00: // pass-through
         return CartRetail::SPIWrite(val, pos-1, last);
+
+    case 0x01: // Read from IR
+        if (pos == 1){
+            memset(RxBuf, 0, sizeof(RxBuf)); //May not be needed
+            return ReadIR(); //Initiates the Read. A whole packet will be grabbed by the frontend with this call and stored in RxBuf. The return value is the length of the packet and will tell the GAME to keep sending SPI commands.
+        }
+        else{
+            u8 data = (unsigned char) RxBuf[pos-2]; //We start returning actual packet data to the game now. Split for debugging currently.
+            return data;
+        }
+
+    case 0x02: // Write to IR
+
+        TxBuf[pos-1] = (u8) val; // Load spi data into Tx Buffer
+        if (last == 1){
+            u8 sendLen = pos;
+            SendIR(sendLen); //This is the last communication. Frontend needs to know how many bytes to send, because it may not be 0xb8 (full) bytes.
+        }
+        return 0x00; // Perhaps something else is supposed to return on error, but this is fine.
 
     case 0x08: // ID
         return 0xAA;
@@ -1144,6 +1161,66 @@ u8 CartRetailIR::SPIWrite(u8 val, u32 pos, bool last)
 
     return 0;
 }
+
+
+
+/*
+   This is convoluted because 1: I haven't rewritten it to be nice and 2: We need to wait 3500us for no data. If we do NOT wait,
+    walker emulators may work, but real hardware won't. Precise timings should be handled HERE to make Platform.h implementations
+    as simple as possible.
+  */
+u8 CartRetailIR::ReadIR(){
+	char tempBuf[0xB8];
+	int len = Platform::IR_RecievePacket(tempBuf, sizeof(tempBuf));
+	u8 pointer = 0;
+    long long lastRxTime = Platform::GetUSCount();
+
+    // This enters the recieve loop. IF there are bytes to be recieved, keep trying to recieve
+	if (len > 0){
+		lastRxTime = Platform::GetUSCount();
+		for(int i = 0; i < len; i++){
+			RxBuf[pointer + i] = tempBuf[i];
+		}
+		pointer = pointer + len;
+
+        //keep trying to Rx until 3500us has passed
+		while((Platform::GetUSCount() - lastRxTime) < 3500){ //Maybe this can be fine tuned
+			len = Platform::IR_RecievePacket(tempBuf, sizeof(tempBuf));
+			if (len <= 0){ continue;}
+			else{
+
+				lastRxTime = Platform::GetUSCount();
+				for(int i = 0; i < len; i++){
+					RxBuf[pointer + i] = tempBuf[i];
+				}
+				pointer = pointer + len;
+			}
+		}
+	}
+
+	recvLen = pointer;
+	if (recvLen == 0) return 0;
+    /*
+	printf("\nRecieved %d Bytes \n", recvLen);
+	for (int i = 0; i < recvLen; i++){
+		printf("0x%02x ", (u8)buf[i] ^ 0xaa);
+	}
+	printf("\n");*/
+	return recvLen;
+
+}
+
+//Sends an entire packet to the frontend.
+u8 CartRetailIR::SendIR(u8 len){
+    int sent;
+	if ((u8)TxBuf[0] == 94) Platform::Sleep(10000); //Immediate disconnect. This packet needs to WAIT or else it will be piggybacked onto the latest packet (on the walker's end)
+    sent = Platform::IR_SendPacket(TxBuf, len);
+    if (sent < 0) perror("send error");
+    return 0;
+
+}
+
+
 
 CartRetailBT::CartRetailBT(const u8* rom, u32 len, u32 chipid, ROMListEntry romparams, std::unique_ptr<u8[]>&& sram, u32 sramlen, void* userdata) :
     CartRetailBT(CopyToUnique(rom, len), len, chipid, romparams, std::move(sram), sramlen, userdata)

@@ -33,6 +33,10 @@
 #include <QTemporaryFile>
 #include <SDL_loadso.h>
 
+#include <QTcpServer>
+#include <QTcpSocket>
+#include <QtSerialPort/QSerialPort>
+
 #include "Platform.h"
 #include "Config.h"
 #include "EmuInstance.h"
@@ -591,5 +595,145 @@ void* DynamicLibrary_LoadFunction(DynamicLibrary* lib, const char* name)
 {
     return SDL_LoadFunction(lib, name);
 }
+
+
+
+
+//Improvements to be made.
+
+
+
+int IRMode = 1;
+//---------------------TCP = 1
+QTcpServer *server = nullptr;
+QTcpSocket *sock = nullptr;
+void IR_OpenTCP(){
+
+    int conn = 0;
+    if (!server){
+
+        server = new QTcpServer();
+        if (!server->listen(QHostAddress::Any, 8081)) {
+            printf("Failed to start TCP server: %s\n", server->errorString().toUtf8().constData());
+            return;
+        }
+        printf("TCP server listening on port 8081\n");
+    }
+
+    else return;
+
+    while(conn == 0){
+        QCoreApplication::processEvents();
+        if (!sock && server->hasPendingConnections()) {
+            sock = server->nextPendingConnection();
+            printf("Client connected\n");
+            conn = 1;
+        }
+        QThread::msleep(10); // avoid CPU spin
+    }
+}
+
+u8 IR_TCP_SendPacket(char* data, int len){
+    IR_OpenTCP();
+    QCoreApplication::processEvents();
+
+    if (!sock || sock->state() != QAbstractSocket::ConnectedState){
+        printf("No client connected to send IR data\n");
+        return 0;
+    }
+
+    qint64 written = sock->write(data, len);
+    sock->flush();
+
+    printf("Sent %lld bytes to client\n", written);
+    return 0;
+}
+
+
+u8 IR_TCP_RecievePacket(char* data, int len){
+    IR_OpenTCP();
+    QCoreApplication::processEvents();
+    if (!sock || sock->bytesAvailable() <= 0){
+        return 0;
+    }
+    qint64 bytesRead = sock->read(data, len); //len is maxLen
+
+    if (bytesRead > 0){
+        return static_cast<int>(bytesRead);
+    }
+    printf("Read 0 bytes\n");
+    return 0;
+}
+
+
+
+//--------------------SERIAL = 0
+QSerialPort *serial = nullptr;
+void IR_OpenSerialPort(){
+    if (!serial){
+        serial = new QSerialPort();
+        serial->setPortName("/dev/ttyUSB0");
+        serial->setBaudRate(QSerialPort::Baud115200);
+        serial->setDataBits(QSerialPort::Data8);
+        serial->setParity(QSerialPort::NoParity);
+        serial->setStopBits(QSerialPort::OneStop);
+        serial->setFlowControl(QSerialPort::NoFlowControl);
+        if (!serial->open(QIODevice::ReadWrite)) {
+            printf("Failed to open serial port %s\n", serial->errorString().toUtf8().constData());
+        }
+        else printf("Serial port open:\n");
+    }
+    else return;
+}
+u8 IR_Serial_SendPacket(char* data, int len){
+    IR_OpenSerialPort();
+    QCoreApplication::processEvents(); // allow Qt to update I/O status
+    if (!serial || !serial->isOpen()) {
+        printf("Serial write failed: port not open\n");
+        return 0;
+    }
+    qint64 written = serial->write(data, len);
+    serial->flush();
+    printf("Serial wrote %lld bytes\n", written);
+    return static_cast<u8>(written);
+
+}
+u8 IR_Serial_RecievePacket(char* data, int len){
+    IR_OpenSerialPort();
+    QCoreApplication::processEvents(); // allow Qt to update I/O status
+    if (!serial || !serial->isOpen() || !serial->bytesAvailable()) {
+        return 0;
+    }
+    qint64 bytesRead = serial->read(data, len);
+    if (bytesRead > 0) {
+        printf("Serial Read %lld bytes: ", bytesRead);
+        for (int i = 0; i < bytesRead; ++i)
+            printf("%02X ", static_cast<unsigned char>(data[i]));
+        printf("\n");
+        return static_cast<u8>(bytesRead);
+    }
+    return 0;
+}
+
+
+//--------------------------------Global
+u8 IR_SendPacket(char* data, int len){
+    if (IRMode == 0) return IR_Serial_SendPacket(data, len);
+    if (IRMode == 1) return IR_TCP_SendPacket(data, len);
+    return 0;
+}
+u8 IR_RecievePacket(char* data, int len){
+    if (IRMode == 0) return IR_Serial_RecievePacket(data, len);
+    if (IRMode == 1) return IR_TCP_RecievePacket(data, len);
+    return 0;
+}
+
+
+
+
+
+
+
+
 
 }
