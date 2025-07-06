@@ -603,11 +603,11 @@ void* DynamicLibrary_LoadFunction(DynamicLibrary* lib, const char* name)
 
 
 
-int IRMode = 1;
-//---------------------TCP = 1
+int IRMode = 0;
+//---------------------TCP = 2
 QTcpServer *server = nullptr;
 QTcpSocket *sock = nullptr;
-void IR_OpenTCP(){
+void IR_OpenTCP(void * userdata){
 
     int conn = 0;
     if (!server){
@@ -633,8 +633,8 @@ void IR_OpenTCP(){
     }
 }
 
-u8 IR_TCP_SendPacket(char* data, int len){
-    IR_OpenTCP();
+u8 IR_TCP_SendPacket(char* data, int len, void * userdata){
+    IR_OpenTCP(userdata);
     QCoreApplication::processEvents();
 
     if (!sock || sock->state() != QAbstractSocket::ConnectedState){
@@ -650,8 +650,8 @@ u8 IR_TCP_SendPacket(char* data, int len){
 }
 
 
-u8 IR_TCP_RecievePacket(char* data, int len){
-    IR_OpenTCP();
+u8 IR_TCP_RecievePacket(char* data, int len, void * userdata){
+    IR_OpenTCP(userdata);
     QCoreApplication::processEvents();
     if (!sock || sock->bytesAvailable() <= 0){
         return 0;
@@ -667,12 +667,19 @@ u8 IR_TCP_RecievePacket(char* data, int len){
 
 
 
-//--------------------SERIAL = 0
+//--------------------SERIAL = 1
 QSerialPort *serial = nullptr;
-void IR_OpenSerialPort(){
+void IR_OpenSerialPort(void * userdata){
     if (!serial){
+
+        EmuInstance* inst = (EmuInstance*)userdata;
+        auto& cfg = inst->getLocalConfig();
+
+
+
+
         serial = new QSerialPort();
-        serial->setPortName("/dev/ttyUSB0");
+        serial->setPortName(cfg.GetQString("IR.SerialPortPath"));
         serial->setBaudRate(QSerialPort::Baud115200);
         serial->setDataBits(QSerialPort::Data8);
         serial->setParity(QSerialPort::NoParity);
@@ -685,8 +692,8 @@ void IR_OpenSerialPort(){
     }
     else return;
 }
-u8 IR_Serial_SendPacket(char* data, int len){
-    IR_OpenSerialPort();
+u8 IR_Serial_SendPacket(char* data, int len, void * userdata){
+    IR_OpenSerialPort(userdata);
     QCoreApplication::processEvents(); // allow Qt to update I/O status
     if (!serial || !serial->isOpen()) {
         printf("Serial write failed: port not open\n");
@@ -698,8 +705,8 @@ u8 IR_Serial_SendPacket(char* data, int len){
     return static_cast<u8>(written);
 
 }
-u8 IR_Serial_RecievePacket(char* data, int len){
-    IR_OpenSerialPort();
+u8 IR_Serial_RecievePacket(char* data, int len,void * userdata){
+    IR_OpenSerialPort(userdata);
     QCoreApplication::processEvents(); // allow Qt to update I/O status
     if (!serial || !serial->isOpen() || !serial->bytesAvailable()) {
         return 0;
@@ -717,14 +724,31 @@ u8 IR_Serial_RecievePacket(char* data, int len){
 
 
 //--------------------------------Global
-u8 IR_SendPacket(char* data, int len){
-    if (IRMode == 0) return IR_Serial_SendPacket(data, len);
-    if (IRMode == 1) return IR_TCP_SendPacket(data, len);
+u8 IR_SendPacket(char* data, int len, void * userdata){
+    EmuInstance* inst = (EmuInstance*)userdata;
+    auto& cfg = inst->getLocalConfig();
+
+
+    IRMode = cfg.GetInt("IR.Mode");
+    printf("Trying to send IR Packet in mode: %d\n", IRMode);
+
+    if (IRMode == 0) return 0;
+    if (IRMode == 1) return IR_Serial_SendPacket(data, len, userdata);
+    if (IRMode == 2) return IR_TCP_SendPacket(data, len, userdata);
+    if (IRMode == 3) return 0;
     return 0;
 }
-u8 IR_RecievePacket(char* data, int len){
-    if (IRMode == 0) return IR_Serial_RecievePacket(data, len);
-    if (IRMode == 1) return IR_TCP_RecievePacket(data, len);
+u8 IR_RecievePacket(char* data, int len, void * userdata){
+    EmuInstance* inst = (EmuInstance*)userdata;
+    auto& cfg = inst->getLocalConfig();
+
+    IRMode = cfg.GetInt("IR.Mode");
+    printf("Trying to recieve IR Packet in mode: %d\n", IRMode);
+
+    if (IRMode == 0) return 0;
+    if (IRMode == 1) return IR_Serial_RecievePacket(data, len, userdata);
+    if (IRMode == 2) return IR_TCP_RecievePacket(data, len, userdata);
+    if (IRMode == 3) return 0;
     return 0;
 }
 
