@@ -27,6 +27,7 @@ set(SOURCES_QT_SDL
     PathSettingsDialog.cpp
     MPSettingsDialog.cpp
     WifiSettingsDialog.cpp
+    IRSettingsDialog.cpp
     InterfaceSettingsDialog.cpp
     ROMInfoDialog.cpp
     RAMInfoDialog.cpp
