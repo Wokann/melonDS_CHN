@@ -1143,8 +1143,10 @@ u8 CartRetailIR::SPIWrite(u8 val, u32 pos, bool last)
         }
         else{
             u8 data = (unsigned char) RxBuf[pos-2]; //We start returning actual packet data to the game now. Split for debugging currently.
+
             return data;
         }
+
 
     case 0x02: // Write to IR
 
@@ -1152,6 +1154,7 @@ u8 CartRetailIR::SPIWrite(u8 val, u32 pos, bool last)
         if (last == 1){
             u8 sendLen = pos;
             SendIR(sendLen); //This is the last communication. Frontend needs to know how many bytes to send, because it may not be 0xb8 (full) bytes.
+
         }
         return 0x00; // Perhaps something else is supposed to return on error, but this is fine.
 
@@ -1200,18 +1203,24 @@ u8 CartRetailIR::ReadIR(){
 
 	recvLen = pointer;
 	if (recvLen == 0) return 0;
+
     /*
 	printf("\nRecieved %d Bytes \n", recvLen);
 	for (int i = 0; i < recvLen; i++){
-		printf("0x%02x ", (u8)buf[i] ^ 0xaa);
+		printf("0x%02x ", (u8)RxBuf[i] ^ 0xaa);
 	}
-	printf("\n");*/
+	printf("\n");
+    */
+
+    Platform::IR_LogPacket((char *) &RxBuf, recvLen, false, UserData);
 	return recvLen;
 
 }
 
 //Sends an entire packet to the frontend.
 u8 CartRetailIR::SendIR(u8 len){
+
+    Platform::IR_LogPacket((char *) &TxBuf, len, true, UserData);
     int sent;
 	if ((u8)TxBuf[0] == 94) Platform::Sleep(10000); //Immediate disconnect. This packet needs to WAIT or else it will be piggybacked onto the latest packet (on the walker's end)
     sent = Platform::IR_SendPacket(TxBuf, len, UserData);
