@@ -1138,7 +1138,8 @@ u8 CartRetailIR::SPIWrite(u8 val, u32 pos, bool last)
 
     case 0x01: // Read from IR
         if (pos == 1){
-            memset(RxBuf, 0, sizeof(RxBuf)); //May not be needed
+//            memset(RxBuf, 0, sizeof(RxBuf)); //May not be needed
+
             return ReadIR(); //Initiates the Read. A whole packet will be grabbed by the frontend with this call and stored in RxBuf. The return value is the length of the packet and will tell the GAME to keep sending SPI commands.
         }
         else{
@@ -1172,11 +1173,57 @@ u8 CartRetailIR::SPIWrite(u8 val, u32 pos, bool last)
     walker emulators may work, but real hardware won't. Precise timings should be handled HERE to make Platform.h implementations
     as simple as possible.
   */
+
+long long timeToAcceptPacket = 0;
 u8 CartRetailIR::ReadIR(){
 	char tempBuf[0xB8];
-	int len = Platform::IR_RecievePacket(tempBuf, sizeof(tempBuf), UserData);
+
+    setvbuf(stdout, NULL, _IONBF, 0);  // Turn off stdout buffering
 	u8 pointer = 0;
+
+
+
+
+        //THIS IS IMPORTANT FOR DIRECT MODE
+        if (Platform::IR_BypassDelay(UserData)){
+            /*
+            //No data ye
+            if (timeToAcceptPacket < 7){
+                timeToAcceptPacket++;
+                //printf("Packet init\n\n");
+                //timeToAcceptPacket = Platform::GetUSCount() + 10000;
+                return 0;
+            }
+            */
+
+            int len = Platform::IR_RecievePacket(tempBuf, sizeof(tempBuf), UserData);
+	        for(int i = 0; i < len; i++){
+			    RxBuf[pointer + i] = tempBuf[i];
+		    }
+		    pointer = pointer + len;
+
+
+
+            recvLen = pointer;
+	        if (recvLen == 0) return 0;
+            Platform::IR_LogPacket((char *) &RxBuf, recvLen, false, UserData);
+            return recvLen;
+        }
+
+
+
+
+
+
+
+
+
+
+
+    int len = Platform::IR_RecievePacket(tempBuf, sizeof(tempBuf), UserData);
     long long lastRxTime = Platform::GetUSCount();
+
+
 
     // This enters the recieve loop. IF there are bytes to be recieved, keep trying to recieve
 	if (len > 0){
@@ -1185,6 +1232,10 @@ u8 CartRetailIR::ReadIR(){
 			RxBuf[pointer + i] = tempBuf[i];
 		}
 		pointer = pointer + len;
+
+
+
+
 
         //keep trying to Rx until 3500us has passed
 		while((Platform::GetUSCount() - lastRxTime) < 3500){ //Maybe this can be fine tuned
@@ -1199,19 +1250,19 @@ u8 CartRetailIR::ReadIR(){
 				pointer = pointer + len;
 			}
 		}
-	}
+    }
 
 	recvLen = pointer;
 	if (recvLen == 0) return 0;
 
-    /*
+/*
 	printf("\nRecieved %d Bytes \n", recvLen);
 	for (int i = 0; i < recvLen; i++){
 		printf("0x%02x ", (u8)RxBuf[i] ^ 0xaa);
 	}
 	printf("\n");
-    */
 
+*/
     Platform::IR_LogPacket((char *) &RxBuf, recvLen, false, UserData);
 	return recvLen;
 

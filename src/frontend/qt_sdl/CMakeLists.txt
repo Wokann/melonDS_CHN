@@ -27,7 +27,10 @@ set(SOURCES_QT_SDL
     PathSettingsDialog.cpp
     MPSettingsDialog.cpp
     WifiSettingsDialog.cpp
+
     IR/IRSettingsDialog.cpp
+
+    IR/PokeEscalator.cpp
     IR/IR.cpp
     InterfaceSettingsDialog.cpp
     ROMInfoDialog.cpp
