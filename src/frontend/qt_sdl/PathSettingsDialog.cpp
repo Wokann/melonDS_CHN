@@ -36,7 +36,7 @@ PathSettingsDialog* PathSettingsDialog::currentDlg = nullptr;
 
 bool PathSettingsDialog::needsReset = false;
 
-constexpr char errordialog[] = "melonDS cannot write to that directory.";
+constexpr char errordialog[] = "melonDS无法在该文件夹写入数据。";
 
 PathSettingsDialog::PathSettingsDialog(QWidget* parent) : QDialog(parent), ui(new Ui::PathSettingsDialog)
 {
@@ -52,7 +52,7 @@ PathSettingsDialog::PathSettingsDialog(QWidget* parent) : QDialog(parent), ui(ne
 
     int inst = emuInstance->getInstanceID();
     if (inst > 0)
-        ui->lblInstanceNum->setText(QString("Configuring paths for instance %1").arg(inst+1));
+        ui->lblInstanceNum->setText(QString("为窗口 %1 设置路径中").arg(inst+1));
     else
         ui->lblInstanceNum->hide();
 
@@ -103,8 +103,8 @@ void PathSettingsDialog::done(int r)
         if (modified)
         {
             if (emuInstance->emuIsActive()
-                && QMessageBox::warning(this, "Reset necessary to apply changes",
-                    "The emulation will be reset for the changes to take place.",
+                && QMessageBox::warning(this, "应用更改的设置需要重启",
+                    "模拟器将重启以应用更改。",
                     QMessageBox::Ok, QMessageBox::Cancel) != QMessageBox::Ok)
                 return;
 
@@ -127,7 +127,7 @@ void PathSettingsDialog::done(int r)
 void PathSettingsDialog::on_btnSaveFileBrowse_clicked()
 {
     QString dir = QFileDialog::getExistingDirectory(this,
-                                                     "Select save files path...",
+                                                     "选择存档文件路径...",
                                                      emuDirectory);
 
     if (dir.isEmpty()) return;
@@ -144,7 +144,7 @@ void PathSettingsDialog::on_btnSaveFileBrowse_clicked()
 void PathSettingsDialog::on_btnSavestateBrowse_clicked()
 {
     QString dir = QFileDialog::getExistingDirectory(this,
-                                                     "Select savestates path...",
+                                                     "选择即时文件路径...",
                                                      emuDirectory);
 
     if (dir.isEmpty()) return;
@@ -161,7 +161,7 @@ void PathSettingsDialog::on_btnSavestateBrowse_clicked()
 void PathSettingsDialog::on_btnCheatFileBrowse_clicked()
 {
     QString dir = QFileDialog::getExistingDirectory(this,
-                                                     "Select cheat files path...",
+                                                     "选择金手指文件路径...",
                                                      emuDirectory);
 
     if (dir.isEmpty()) return;

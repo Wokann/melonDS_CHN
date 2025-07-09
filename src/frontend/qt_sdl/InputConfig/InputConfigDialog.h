@@ -40,12 +40,12 @@ static constexpr std::initializer_list<int> hk_addons =
 
 static constexpr std::initializer_list<const char*> hk_addons_labels =
 {
-    "[Boktai] Sunlight + ",
-    "[Boktai] Sunlight - ",
-    "[Guitar Grip] Green",
-    "[Guitar Grip] Red",
-    "[Guitar Grip] Yellow",
-    "[Guitar Grip] Blue",
+    "[我们的太阳] 阳光 + ",
+    "[我们的太阳] 阳光 - ",
+    "[吉他握把] 绿",
+    "[吉他握把] 红",
+    "[吉他握把] 黄",
+    "[吉他握把] 蓝",
 };
 
 static_assert(hk_addons.size() == hk_addons_labels.size());
@@ -72,22 +72,22 @@ static constexpr std::initializer_list<int> hk_general =
 
 static constexpr std::initializer_list<const char*> hk_general_labels =
 {
-    "Pause/resume",
-    "Reset",
-    "Frame step",
-    "Fast forward",
-    "Toggle fast forward",
-    "Slow mo",
-    "Toggle slow mo",
-    "Toggle FPS limit",
-    "Toggle fullscreen",
-    "Close/open lid",
-    "Microphone",
-    "Swap screens",
-    "Swap screen emphasis",
-    "DSi Power button",
-    "DSi Volume up",
-    "DSi Volume down"
+    "暂停/恢复",
+    "重置",
+    "帧步进",
+    "快进",
+    "切换快进",
+    "慢速",
+    "切换慢速",
+    "切换FPS限制",
+    "切换全屏",
+    "盒盖/开盖",
+    "麦克风",
+    "交换屏幕",
+    "切换扩显屏幕",
+    "DSi关机键",
+    "DSi音量+",
+    "DSi音量-"
 };
 
 static_assert(hk_general.size() == hk_general_labels.size());
