@@ -128,7 +128,7 @@ void SaveManager::CheckFlush()
 
     SecondaryBufferLock->lock();
 
-    Log(LogLevel::Info, "SaveManager: Flush requested\n");
+    Log(LogLevel::Info, "存档管理器: 请求刷新\n");
 
     if (SecondaryBufferLength != Length)
     {
@@ -183,7 +183,7 @@ void SaveManager::FlushSecondaryBuffer(u8* dst, u32 dstLength)
         if (f)
         {
             FileWrite(SecondaryBuffer.get(), SecondaryBufferLength, 1, f);
-            Log(LogLevel::Info, "SaveManager: Wrote %u bytes to %s\n", SecondaryBufferLength, Path.c_str());
+            Log(LogLevel::Info, "存档管理器: 已写入 %u 字节至 %s\n", SecondaryBufferLength, Path.c_str());
             CloseFile(f);
         }
     }

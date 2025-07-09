@@ -51,14 +51,14 @@ AudioSettingsDialog::AudioSettingsDialog(QWidget* parent) : QDialog(parent), ui(
     volume = oldVolume;
     dsiSync = oldDSiSync;
 
-    ui->cbInterpolation->addItem("None");
-    ui->cbInterpolation->addItem("Linear");
-    ui->cbInterpolation->addItem("Cosine");
-    ui->cbInterpolation->addItem("Cubic");
-    ui->cbInterpolation->addItem("Gaussian (SNES)");
+    ui->cbInterpolation->addItem("无");
+    ui->cbInterpolation->addItem("线性");
+    ui->cbInterpolation->addItem("余弦");
+    ui->cbInterpolation->addItem("立体");
+    ui->cbInterpolation->addItem("高斯 (SNES)");
     ui->cbInterpolation->setCurrentIndex(oldInterp);
 
-    ui->cbBitDepth->addItem("Automatic");
+    ui->cbBitDepth->addItem("自动");
     ui->cbBitDepth->addItem("10-bit");
     ui->cbBitDepth->addItem("16-bit");
     ui->cbBitDepth->setCurrentIndex(oldBitDepth);
@@ -119,7 +119,7 @@ AudioSettingsDialog::AudioSettingsDialog(QWidget* parent) : QDialog(parent), ui(
     int inst = emuInstance->getInstanceID();
     if (inst > 0)
     {
-        ui->lblInstanceNum->setText(QString("Configuring settings for instance %1").arg(inst+1));
+        ui->lblInstanceNum->setText(QString("为窗口 %1 配置设置").arg(inst+1));
         ui->cbInterpolation->setEnabled(false);
         ui->cbBitDepth->setEnabled(false);
         for (QAbstractButton* btn : grpMicMode->buttons())
@@ -269,9 +269,9 @@ void AudioSettingsDialog::onChangeMicMode(int mode)
 void AudioSettingsDialog::on_btnMicWavBrowse_clicked()
 {
     QString file = QFileDialog::getOpenFileName(this,
-                                                "Select WAV file...",
+                                                "选择 WAV 文件...",
                                                 emuDirectory,
-                                                "WAV files (*.wav);;Any file (*.*)");
+                                                "WAV 文件 (*.wav);;任何文件 (*.*)");
 
     if (file.isEmpty()) return;
 

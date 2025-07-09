@@ -126,7 +126,7 @@ void TitleManagerDialog::createTitleItem(u32 category, u32 titleid)
     *(u32*)&gamecode[0] = *(u32*)&header.GameCode[0];
     gamecode[4] = '\0';
     char extra[128];
-    snprintf(extra, sizeof(extra), "\n(title ID: %s · %08x/%08x · version %08x)", gamecode, category, titleid, version);
+    snprintf(extra, sizeof(extra), "\n(应用 ID: %s · %08x/%08x · 版本 %08x)", gamecode, category, titleid, version);
 
     QListWidgetItem* item = new QListWidgetItem(title + QString(extra));
     item->setIcon(icon);
@@ -209,8 +209,8 @@ void TitleManagerDialog::onImportTitleFinished(int res)
         nandmount.DeleteTitle(titleid[0], titleid[1]);
 
         QMessageBox::critical(this,
-                              "Import title - melonDS",
-                              "An error occured while installing the title to the NAND.\nCheck that your NAND dump is valid.");
+                              "导入应用 - melonDS",
+                              "将应用安装到NAND时出错。\n检查您的NAND转储是否有效。");
     }
     else
     {
@@ -226,8 +226,8 @@ void TitleManagerDialog::on_btnDeleteTitle_clicked()
     if (!cur) return;
 
     if (QMessageBox::question(this,
-                              "Delete title - melonDS",
-                              "The title and its associated data will be permanently deleted. Are you sure?",
+                              "删除应用 - melonDS",
+                              "应用及其相关数据将被永久删除。 你确定吗？",
                               QMessageBox::StandardButtons(QMessageBox::Yes|QMessageBox::No),
                               QMessageBox::No) != QMessageBox::Yes)
         return;
@@ -272,7 +272,7 @@ void TitleManagerDialog::onImportTitleData()
     QListWidgetItem* cur = ui->lstTitleList->currentItem();
     if (!cur)
     {
-        Log(LogLevel::Error, "what??\n");
+        Log(LogLevel::Error, "什么??\n");
         return;
     }
 
@@ -298,9 +298,9 @@ void TitleManagerDialog::onImportTitleData()
     }
 
     QString file = QFileDialog::getOpenFileName(this,
-                                                "Select file to import...",
+                                                "选择导入文件...",
                                                 emuDirectory,
-                                                "Title data files (" + extensions + ");;Any file (*.*)");
+                                                "应用数据文件 (" + extensions + ");;任何文件 (*.*)");
 
     if (file.isEmpty()) return;
 
@@ -308,8 +308,8 @@ void TitleManagerDialog::onImportTitleData()
     if (!f)
     {
         QMessageBox::critical(this,
-                              "Import title data - melonDS",
-                              "Could not open data file.\nCheck that the file is accessible.");
+                              "导入应用数据 - melonDS",
+                              "无法打开数据文件。\n检查文件是否可访问。");
         return;
     }
 
@@ -319,8 +319,8 @@ void TitleManagerDialog::onImportTitleData()
     if (len != wantedsize)
     {
         QMessageBox::critical(this,
-                              "Import title data - melonDS",
-                              QString("Cannot import this data file: size is incorrect (expected: %1 bytes).").arg(wantedsize));
+                              "导入应用数据 - melonDS",
+                              QString("无法导入此数据文件：大小不正确 (预期： %1 bytes).").arg(wantedsize));
         return;
     }
 
@@ -329,8 +329,8 @@ void TitleManagerDialog::onImportTitleData()
     if (!res)
     {
         QMessageBox::critical(this,
-                              "Import title data - melonDS",
-                              "Failed to import the data file. Check that your NAND is accessible and valid.");
+                              "导入应用数据 - melonDS",
+                              "导入数据文件失败。 检查您的NAND是否可访问且有效。");
     }
 }
 
@@ -341,7 +341,7 @@ void TitleManagerDialog::onExportTitleData()
     QListWidgetItem* cur = ui->lstTitleList->currentItem();
     if (!cur)
     {
-        Log(LogLevel::Error, "what??\n");
+        Log(LogLevel::Error, "什么??\n");
         return;
     }
 
@@ -371,9 +371,9 @@ void TitleManagerDialog::onExportTitleData()
     }
 
     QString file = QFileDialog::getSaveFileName(this,
-                                                "Select path to export to...",
+                                                "选择导出路径...",
                                                 emuDirectory + exportname,
-                                                "Title data files (" + extensions + ");;Any file (*.*)");
+                                                "应用数据文件 (" + extensions + ");;任何文件 (*.*)");
 
     if (file.isEmpty()) return;
 
@@ -382,8 +382,8 @@ void TitleManagerDialog::onExportTitleData()
     if (!res)
     {
         QMessageBox::critical(this,
-                              "Export title data - melonDS",
-                              "Failed to Export the data file. Check that the destination directory is writable.");
+                              "导出应用数据 - melonDS",
+                              "无法导出数据文件。 检查目标目录是否可写。");
     }
 }
 
@@ -422,8 +422,8 @@ void TitleImportDialog::accept()
     if (!f)
     {
         QMessageBox::critical(this,
-                              "Import title - melonDS",
-                              "Could not open executable file.\nCheck that the path is correct and that the file is accessible.");
+                              "导入应用 - melonDS",
+                              "无法打开可执行文件。\n请检查路径是否正确以及文件是否可访问。");
         return;
     }
 
@@ -434,8 +434,8 @@ void TitleImportDialog::accept()
     if (titleid[1] != 0x00030004)
     {
         QMessageBox::critical(this,
-                              "Import title - melonDS",
-                              "Executable file is not a DSiWare title.");
+                              "导入应用 - melonDS",
+                              "可执行文件不是DSiWare应用。");
         return;
     }
 
@@ -446,8 +446,8 @@ void TitleImportDialog::accept()
         if (!f)
         {
             QMessageBox::critical(this,
-                                  "Import title - melonDS",
-                                  "Could not open metadata file.\nCheck that the path is correct and that the file is accessible.");
+                                  "导入应用 - melonDS",
+                                  "无法打开元数据文件。\n请检查路径是否正确以及文件是否可访问。");
             return;
         }
 
@@ -461,8 +461,8 @@ void TitleImportDialog::accept()
         if (tmdtitleid[1] != titleid[0] || tmdtitleid[0] != titleid[1])
         {
             QMessageBox::critical(this,
-                                  "Import title - melonDS",
-                                  "Title ID in metadata file does not match executable file.");
+                                  "导入应用 - melonDS",
+                                  "元数据文件中的应用ID与可执行文件不匹配。");
             return;
         }
     }
@@ -470,8 +470,8 @@ void TitleImportDialog::accept()
     if (nandmount.TitleExists(titleid[1], titleid[0]))
     {
         if (QMessageBox::question(this,
-                                  "Import title - melonDS",
-                                  "The selected title is already installed. Overwrite it?",
+                                  "导入应用 - melonDS",
+                                  "所选应用已安装。 覆盖它？",
                                   QMessageBox::StandardButtons(QMessageBox::Yes|QMessageBox::No),
                                   QMessageBox::No) != QMessageBox::Yes)
             return;
@@ -507,14 +507,14 @@ void TitleImportDialog::tmdDownloaded()
     if (netreply->error() != QNetworkReply::NoError)
     {
         QMessageBox::critical(this,
-                              "Import title - melonDS",
-                              QString("An error occurred while trying to download the metadata file:\n\n") + netreply->errorString());
+                              "导入应用 - melonDS",
+                              QString("尝试下载元数据文件时出错：\n\n") + netreply->errorString());
     }
     else if (netreply->bytesAvailable() < 2312)
     {
         QMessageBox::critical(this,
-                              "Import title - melonDS",
-                              "NUS returned a malformed metadata file.");
+                              "导入应用 - melonDS",
+                              "NUS 返回了格式错误的元数据文件。");
     }
     else
     {
@@ -527,8 +527,8 @@ void TitleImportDialog::tmdDownloaded()
         if (tmdtitleid[1] != titleid[0] || tmdtitleid[0] != titleid[1])
         {
             QMessageBox::critical(this,
-                                  "Import title - melonDS",
-                                  "NUS returned a malformed metadata file.");
+                                  "导入应用 - melonDS",
+                                  "NUS 返回了格式错误的元数据文件。");
         }
         else
             good = true;
@@ -548,9 +548,9 @@ void TitleImportDialog::tmdDownloaded()
 void TitleImportDialog::on_btnAppBrowse_clicked()
 {
     QString file = QFileDialog::getOpenFileName(this,
-                                                "Select title executable...",
+                                                "选择可执行应用...",
                                                 emuDirectory,
-                                                "DSiWare executables (*.app *.nds *.dsi *.srl);;Any file (*.*)");
+                                                "DSiWare可执行程序 (*.app *.nds *.dsi *.srl);;任何文件 (*.*)");
 
     if (file.isEmpty()) return;
 
@@ -560,9 +560,9 @@ void TitleImportDialog::on_btnAppBrowse_clicked()
 void TitleImportDialog::on_btnTmdBrowse_clicked()
 {
     QString file = QFileDialog::getOpenFileName(this,
-                                                "Select title metadata...",
+                                                "选择应用元数据...",
                                                 emuDirectory,
-                                                "DSiWare metadata (*.tmd);;Any file (*.*)");
+                                                "DSiWare元数据 (*.tmd);;任何文件 (*.*)");
 
     if (file.isEmpty()) return;
 
