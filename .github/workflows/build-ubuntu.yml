@@ -3,7 +3,7 @@ name: Ubuntu
 on:
   push:
     branches:
-      - master
+      - 0.9.5_CHN_remake
       - ci/*
   pull_request:
     branches:
