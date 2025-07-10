@@ -41,7 +41,7 @@ jobs:
       working-directory: ${{runner.workspace}}/build
       run: make -j$(nproc --all)
 
-    - uses: actions/upload-artifact@v3
+    - uses: actions/upload-artifact@v4
       with:
         name: melonDS-windows-x86_64
         path: ${{runner.workspace}}\build\melonDS.exe

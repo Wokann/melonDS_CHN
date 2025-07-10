@@ -31,7 +31,7 @@ jobs:
         make -j$(nproc --all)
         mkdir dist
         cp melonDS dist
-    - uses: actions/upload-artifact@v3
+    - uses: actions/upload-artifact@v4
       with:
         name: melonDS-ubuntu-x86_64
         path: ${{runner.workspace}}/build/dist
