@@ -3,7 +3,7 @@ name: CMake Build (Windows x86-64)
 on:
   push:
     branches:
-      - master
+      - 0.9.5_CHN_remake
   pull_request:
     branches:
       - master
@@ -20,7 +20,7 @@ jobs:
       run:
         shell: msys2 {0}
     steps:
-    - uses: actions/checkout@v1
+    - uses: actions/checkout@v4
     - uses: msys2/setup-msys2@v2
       with:
           msystem: MINGW64
@@ -41,7 +41,7 @@ jobs:
       working-directory: ${{runner.workspace}}/build
       run: make -j$(nproc --all)
 
-    - uses: actions/upload-artifact@v1
+    - uses: actions/upload-artifact@v3
       with:
         name: melonDS-windows-x86_64
         path: ${{runner.workspace}}\build\melonDS.exe

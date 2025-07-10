@@ -3,7 +3,7 @@ name: CMake Build (Ubuntu aarch64)
 on:
   push:
     branches:
-      - master
+      - 0.9.5_CHN_remake
   pull_request:
     branches:
       - master
@@ -13,8 +13,8 @@ env:
 
 jobs:
   build:
-    runs-on: ubuntu-20.04
-    container: ubuntu:20.04
+    runs-on: ubuntu-22.04-arm
+    container: ubuntu:22.04-arm
 
     steps:
     - name: Prepare system
@@ -24,7 +24,7 @@ jobs:
         apt -y full-upgrade
         apt -y install git
     - name: Check out source
-      uses: actions/checkout@v1
+      uses: actions/checkout@v4
     - name: Install dependencies
       shell: bash
       run: |
@@ -44,7 +44,7 @@ jobs:
         cmake --build build -j$(nproc --all)
         mkdir dist
         cp build/melonDS dist
-    - uses: actions/upload-artifact@v1
+    - uses: actions/upload-artifact@v3
       with:
         name: melonDS-ubuntu-aarch64
         path: dist
