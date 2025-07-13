@@ -3,71 +3,70 @@ name: CMake Build (macOS Universal)
 on:
   push:
     branches:
-      - master
+      - 0.9.5_CHN_remake
   pull_request:
     branches:
       - master
 
 jobs:
-  prepare:
-    runs-on: [self-hosted, macOS, ARM64]
-    
-    steps:
-      - name: Clean workspace
-        run: rm -rf ${{runner.workspace}}/build
-
-      - uses: actions/checkout@v3      
-
-
-  build-arm64:
-    needs: prepare
-    runs-on: [self-hosted, macOS, ARM64]
+  build-universal:
+    runs-on: macos-14
     env:
-      homebrew_prefix: /opt/homebrew
-
+      BUILD_TYPE: Release
     steps:
-      - name: Create build directory
-        run: mkdir -p ${{runner.workspace}}/build/arm64
+      - uses: actions/checkout@v3
 
-      - name: Configure
-        working-directory: ${{runner.workspace}}/build/arm64
-        run: arch -arm64 ${{env.homebrew_prefix}}/bin/cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DCMAKE_PREFIX_PATH="${{env.homebrew_prefix}}/opt/qt@6;${{env.homebrew_prefix}}/opt/libarchive" -DPKG_CONFIG_EXECUTABLE=${{env.homebrew_prefix}}/bin/pkg-config -DMACOS_BUNDLE_LIBS=ON -DUSE_QT6=ON
+      - name: Install ARM64 dependencies
+        run: brew install git pkg-config cmake sdl2 qt@6 libslirp libarchive
 
-      - name: Make
-        working-directory: ${{runner.workspace}}/build/arm64
-        run: arch -arm64 make -j$(sysctl -n hw.logicalcpu)
+      - name: Install Rosetta
+        run: |
+          if ! pgrep oahd >/dev/null; then
+            softwareupdate --install-rosetta --agree-to-license
+          fi
 
-  build-x86_64:
-    needs: prepare
-    runs-on: [self-hosted, macOS, ARM64]
-    env:
-      homebrew_prefix: /usr/local
+      - name: Install Rosetta Homebrew if missing
+        run: |
+          if [ ! -f /usr/local/bin/brew ]; then
+            arch -x86_64 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+          fi
 
-    steps:
-      - name: Create build directory
-        run: mkdir -p ${{runner.workspace}}/build/x86_64
+      - name: Install x86_64 dependencies
+        run: arch -x86_64 /usr/local/bin/brew install git pkg-config cmake sdl2 qt@6 libslirp libarchive
 
-      - name: Configure
-        working-directory: ${{runner.workspace}}/build/x86_64
-        run: arch -x86_64 ${{env.homebrew_prefix}}/bin/cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DCMAKE_PREFIX_PATH="${{env.homebrew_prefix}}/opt/qt@6;${{env.homebrew_prefix}}/opt/libarchive" -DPKG_CONFIG_EXECUTABLE=${{env.homebrew_prefix}}/bin/pkg-config -DMACOS_BUNDLE_LIBS=ON -DUSE_QT6=ON
+      - name: Create ARM64 build directory
+        run: mkdir -p ${{ github.workspace }}/build/arm64
 
-      - name: Make
-        working-directory: ${{runner.workspace}}/build/x86_64
+      - name: ARM64 Configure
+        working-directory: ${{ github.workspace }}/build/arm64
+        run: /opt/homebrew/bin/cmake ${{ github.workspace }} -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DCMAKE_OSX_ARCHITECTURES=arm64 -DCMAKE_PREFIX_PATH="/opt/homebrew/opt/qt@6;/opt/homebrew/opt/libarchive" -DPKG_CONFIG_EXECUTABLE=/opt/homebrew/bin/pkg-config -DMACOS_BUNDLE_LIBS=ON -DUSE_QT6=ON
+
+      - name: ARM64 Make
+        working-directory: ${{ github.workspace }}/build/arm64
+        run: make -j$(sysctl -n hw.logicalcpu)
+
+      - name: Create x86_64 build directory
+        run: mkdir -p ${{ github.workspace }}/build/x86_64
+
+      - name: x86_64 Configure
+        working-directory: ${{ github.workspace }}/build/x86_64
+        run: arch -x86_64 /usr/local/bin/cmake ${{ github.workspace }} -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DCMAKE_OSX_ARCHITECTURES=x86_64 -DCMAKE_PREFIX_PATH="/usr/local/opt/qt@6;/usr/local/opt/libarchive" -DPKG_CONFIG_EXECUTABLE=/usr/local/bin/pkg-config -DMACOS_BUNDLE_LIBS=ON -DUSE_QT6=ON
+
+      - name: x86_64 Make
+        working-directory: ${{ github.workspace }}/build/x86_64
         run: arch -x86_64 make -j$(sysctl -n hw.logicalcpu)
 
-  universal-binary:
-    needs: [build-arm64, build-x86_64]
-    runs-on: [self-hosted, macOS, ARM64]
+      - name: Create universal build directory
+        run: mkdir -p ${{ github.workspace }}/build/universal
 
-    steps:
-      - name: Merge binaries
-        run: $GITHUB_WORKSPACE/tools/mac-universal.py ${{runner.workspace}}/build/arm64/melonDS.app ${{runner.workspace}}/build/x86_64/melonDS.app ${{runner.workspace}}/build/universal/melonDS.app
+      - name: Merge universal binaries
+        run: ${{ github.workspace }}/tools/mac-universal.py ${{ github.workspace }}/build/arm64/melonDS.app ${{ github.workspace }}/build/x86_64/melonDS.app ${{ github.workspace }}/build/universal/melonDS.app
 
       - name: Create DMG
-        run: hdiutil create -fs HFS+ -volname melonDS -srcfolder ${{runner.workspace}}/build/universal/melonDS.app -ov -format UDBZ ${{runner.workspace}}/build/universal/melonDS.dmg
+        run: hdiutil create -fs HFS+ -volname melonDS -srcfolder ${{ github.workspace }}/build/universal/melonDS.app -ov -format UDBZ ${{ github.workspace }}/build/universal/melonDS.dmg
 
-      - uses: actions/upload-artifact@v3
+      - name: Upload universal artifact
+        uses: actions/upload-artifact@v4
         with:
           name: macOS-universal
-          path: ${{runner.workspace}}/build/universal/melonDS.dmg
-      
+          path: ${{ github.workspace }}/build/universal/melonDS.dmg

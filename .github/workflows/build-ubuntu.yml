@@ -3,7 +3,7 @@ name: CMake Build (Ubuntu x86-64)
 on:
   push:
     branches:
-      - master
+      - 0.9.5_CHN_remake
   pull_request:
     branches:
       - master
@@ -11,15 +11,15 @@ on:
 jobs:
   build:
 
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
 
     steps:
-    - uses: actions/checkout@v1
+    - uses: actions/checkout@v4
     - name: Install dependencies
       run: |
         sudo rm -f /etc/apt/sources.list.d/dotnetdev.list /etc/apt/sources.list.d/microsoft-prod.list
         sudo apt update
-        sudo apt install cmake extra-cmake-modules libcurl4-gnutls-dev libpcap0.8-dev libsdl2-dev qt5-default qtbase5-private-dev qtmultimedia5-dev libslirp0 libslirp-dev libarchive-dev --allow-downgrades
+        sudo apt install cmake extra-cmake-modules libcurl4-gnutls-dev libpcap0.8-dev libsdl2-dev qtbase5-dev qt5-qmake qtbase5-private-dev qtmultimedia5-dev libslirp0 libslirp-dev libarchive-dev --allow-downgrades
     - name: Create build environment
       run: mkdir ${{runner.workspace}}/build
     - name: Configure
@@ -31,7 +31,7 @@ jobs:
         make -j$(nproc --all)
         mkdir dist
         cp melonDS dist
-    - uses: actions/upload-artifact@v1
+    - uses: actions/upload-artifact@v4
       with:
         name: melonDS-ubuntu-x86_64
         path: ${{runner.workspace}}/build/dist

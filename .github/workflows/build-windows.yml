@@ -3,7 +3,7 @@ name: CMake Build (Windows x86-64)
 on:
   push:
     branches:
-      - master
+      - 0.9.5_CHN_remake
   pull_request:
     branches:
       - master
@@ -20,7 +20,7 @@ jobs:
       run:
         shell: msys2 {0}
     steps:
-    - uses: actions/checkout@v1
+    - uses: actions/checkout@v3
     - uses: msys2/setup-msys2@v2
       with:
           msystem: MINGW64
@@ -35,13 +35,13 @@ jobs:
 
     - name: Configure
       working-directory: ${{runner.workspace}}/build
-      run: cmake $GITHUB_WORKSPACE -G 'MSYS Makefiles' -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DBUILD_STATIC=ON -DCMAKE_PREFIX_PATH=C:/tools/msys64/mingw64/qt5-static
+      run: cmake $GITHUB_WORKSPACE -G 'MSYS Makefiles' -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DBUILD_STATIC=ON -DCMAKE_PREFIX_PATH=C:/tools/msys64/mingw64/qt5-static -DCMAKE_CXX_STANDARD=17 -DCMAKE_CXX_STANDARD_REQUIRED=ON -DCMAKE_CXX_FLAGS="-include algorithm"
 
     - name: Make
       working-directory: ${{runner.workspace}}/build
       run: make -j$(nproc --all)
 
-    - uses: actions/upload-artifact@v1
+    - uses: actions/upload-artifact@v4
       with:
         name: melonDS-windows-x86_64
         path: ${{runner.workspace}}\build\melonDS.exe
