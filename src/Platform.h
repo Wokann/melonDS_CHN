@@ -424,12 +424,6 @@ u8 IR_RecievePacket(char * data, int len, void * userdata);
 void IR_LogPacket(char * data, int len, bool isTx, void * userdata);
 
 
-//return true if using direct mode
-bool IR_BypassDelay(void * userdata);
-
-
-
-
 
 
 

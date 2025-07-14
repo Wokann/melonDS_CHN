@@ -8,6 +8,13 @@
 #define SKIP_HEADER 8
 
 
+int pw_decompress_data(uint8_t *data, uint8_t *buf, size_t dlen);
+void writeByte(FILE * fh, uint16_t offset, uint16_t byte, size_t count);
+void writeEeprom(FILE * fh, uint16_t offset, void * dat, size_t len);
+uint8_t eeprom_check(uint8_t * buf, size_t len);
+uint16_t pw_ir_checksum_seeded(uint8_t *data, size_t len, uint16_t seed);
+void eeprom_reliable_write(FILE * fh, uint16_t off1, uint16_t off2, uint8_t * buf, size_t len);
+void readEeprom(FILE * fh, uint16_t offset, void * dat, size_t len);
 
 uint8_t dataBuf[0xb8];
 uint8_t decompBuf[0xb8];
@@ -15,30 +22,24 @@ uint8_t writeBuf[0xb8];
 
 
 
-uint8_t eeprom_check(uint8_t * buf, size_t len);
 uint8_t eeprom_check(uint8_t * buf, size_t len){
     uint8_t chk = 1;
     for (size_t i = 0; i < len; i++) chk+= buf[i];
     return chk;
-
-
 }
 
 
-/*
-void eeprom_reliable_write(uint16_t off1, uint16_t off2, uint8_t buf, size_t len){
-        readEeprom(fh, 0x00ed, dataBuf, 128);
-        writeByte(fh, 0x00ed + 0x68, eeprom_check(dataBuf, 0x68), 1);
-        readEeprom(fh, 0x01ed, dataBuf, 128);
-        writeByte(fh, 0x01ed + 0x68, eeprom_check(dataBuf, 0x68), 1);
 
-
-
-}   */
+void eeprom_reliable_write(FILE * fh, uint16_t off1, uint16_t off2, uint8_t * buf, size_t len){
+        uint8_t chk = eeprom_check(buf, len);
+        writeEeprom(fh, off1, buf, len);
+        writeByte(fh, off1+len, chk, 1); //checksum is always 1 byte immediately following the data
+        writeEeprom(fh, off2, buf, len);
+        writeByte(fh, off2+len, chk, 1); //checksum is always 1 byte immediately following the data
+}
 
 
 //mamba
-uint16_t pw_ir_checksum_seeded(uint8_t *data, size_t len, uint16_t seed);
 uint16_t pw_ir_checksum_seeded(uint8_t *data, size_t len, uint16_t seed) {
     // Dmitry's palm
     uint32_t crc = seed;
@@ -52,7 +53,6 @@ uint16_t pw_ir_checksum_seeded(uint8_t *data, size_t len, uint16_t seed) {
 }
 
 
-void readEeprom(FILE * fh, uint16_t offset, void * dat, size_t len);
 void readEeprom(FILE * fh, uint16_t offset, void * dat, size_t len){
     fseek(fh, offset, SEEK_SET);
     fread(dat, 1, len, fh);
@@ -65,7 +65,6 @@ void readEeprom(FILE * fh, uint16_t offset, void * dat, size_t len){
  */
 
 //MODIFY to accpet a whole packet
-void writeEeprom(FILE * fh, uint16_t offset, void * dat, size_t len);
 void writeEeprom(FILE * fh, uint16_t offset, void * dat, size_t len){
     if (fseek(fh, offset, SEEK_SET) !=0) perror("fseek failed");
     if (fwrite(dat, 1, len, fh) != len) perror("fwrite failed");
@@ -75,7 +74,6 @@ void writeEeprom(FILE * fh, uint16_t offset, void * dat, size_t len){
 }
 
 
-void writeByte(FILE * fh, uint16_t offset, uint16_t byte, size_t count);
 void writeByte(FILE * fh, uint16_t offset, uint16_t byte, size_t count){
 
     if (fseek(fh, offset, SEEK_SET) !=0) perror("fseek failed");
@@ -90,7 +88,6 @@ void writeByte(FILE * fh, uint16_t offset, uint16_t byte, size_t count){
 
 
 //mamba
-int pw_decompress_data(uint8_t *data, uint8_t *buf, size_t dlen);
 int pw_decompress_data(uint8_t *data, uint8_t *buf, size_t dlen) {
     if(data == 0 || buf == 0) return -1;
     size_t c = 0;
@@ -177,9 +174,13 @@ void walk_start(FILE * fh){
 
         //cc00 is teamData
 
-        //Read Struct TeamData
+
+
+       //Read Struct TeamData
         readEeprom(fh, 0xcc00, dataBuf, 128);
 
+
+        /* !!!OLD WORKING */
         //Copy to proper UniqueIdentityData and IdentityData Fields
         writeEeprom(fh, 0x083, dataBuf + 8, 0x28);
         writeEeprom(fh, 0x183, dataBuf + 8, 0x28);
@@ -189,7 +190,6 @@ void walk_start(FILE * fh){
 
         //Copy in trainerID, sID
 
-       /* old */
         writeEeprom(fh, 0x0ed + 0x0c, dataBuf + 8 + 0x28, 2); //tid
         writeEeprom(fh, 0x01ed + 0x0c, dataBuf + 8 + 0x28, 2); //tid
 
@@ -227,8 +227,6 @@ void walk_start(FILE * fh){
         writeByte(fh, 0x01ed + 0x5f, 0x02, 1); //unk8
 
 
-
-
         //Checks
         readEeprom(fh, 0x00ed, dataBuf, 128);
         writeByte(fh, 0x00ed + 0x68, eeprom_check(dataBuf, 0x68), 1);
@@ -240,51 +238,49 @@ void walk_start(FILE * fh){
 
 
 void walker_erase(FILE * fh){
-        //I should probably clear more than this
-        writeByte(fh, 0x00ed + 0x5b, 0x00, 1);
+    //I should probably clear more than this
+    writeByte(fh, 0x00ed + 0x5b, 0x00, 1);
 
 
-        writeByte(fh, 0x00ed, 0x00, 0x10);
-        //Not unique IDENTITY data rn. picowalker-core/src/eeprom.c ~ line 140
-        writeByte(fh, 0x00ed + 0x38, 0x00, 0x30);
-        writeByte(fh, 0x00ed + 0x5f, 0x02, 1); //unk8 THIS NEEDS TO STILL BE 0x02
-
-
-
-
-        //Game does NOT CLEAR UNIQUE IDENTITY DATA
-        writeByte(fh, 0x01ed, 0x00, 0x10);
-        writeByte(fh, 0x01ed + 0x38, 0x00, 0x30);
-        writeByte(fh, 0x01ed + 0x5f, 0x02, 1); //unk8. THIS NEEDS TO STILL BE 0x02
-
-        //Populate checksums
-
-
-        readEeprom(fh, 0x00ed, dataBuf, 128);
-        writeByte(fh, 0x00ed + 0x68, eeprom_check(dataBuf, 0x68), 1);
-
-        readEeprom(fh, 0x01ed, dataBuf, 128);
-        writeByte(fh, 0x01ed + 0x68, eeprom_check(dataBuf, 0x68), 1);
+    writeByte(fh, 0x00ed, 0x00, 0x10);
+    //Not unique IDENTITY data rn. picowalker-core/src/eeprom.c ~ line 140
+    writeByte(fh, 0x00ed + 0x38, 0x00, 0x30);
+    writeByte(fh, 0x00ed + 0x5f, 0x02, 1); //unk8 THIS NEEDS TO STILL BE 0x02
 
 
 
 
-        //if clear steps flag
-        writeByte(fh, 0xce80, 0x00, 0xd4c);
-        //else
-        writeByte(fh, 0xce8c, 0x00, 0x64); //Caught summary
-        writeByte(fh, 0xcf0c, 0x00, 3264); //Event log
-        writeByte(fh, 0xcef0, 0x00, 28); //Historic step count
-        //endif
+    //Game does NOT CLEAR UNIQUE IDENTITY DATA
+    writeByte(fh, 0x01ed, 0x00, 0x10);
+    writeByte(fh, 0x01ed + 0x38, 0x00, 0x30);
+    writeByte(fh, 0x01ed + 0x5f, 0x02, 1); //unk8. THIS NEEDS TO STILL BE 0x02
+
+    //Populate checksums
+    readEeprom(fh, 0x00ed, dataBuf, 128);
+    writeByte(fh, 0x00ed + 0x68, eeprom_check(dataBuf, 0x68), 1);
+
+    readEeprom(fh, 0x01ed, dataBuf, 128);
+    writeByte(fh, 0x01ed + 0x68, eeprom_check(dataBuf, 0x68), 1);
 
 
 
-        //if clear events flag
-        writeByte(fh, 0xb800, 0x00, 0x6c8); //recieved something
-        //endif
+
+    //if clear steps flag
+    writeByte(fh, 0xce80, 0x00, 0xd4c);
+    //else
+    writeByte(fh, 0xce8c, 0x00, 0x64); //Caught summary
+    writeByte(fh, 0xcf0c, 0x00, 3264); //Event log
+    writeByte(fh, 0xcef0, 0x00, 28); //Historic step count
+    //endif
 
 
-        writeByte(fh, 0xde24, 0x00, 0x1568); //peers
+
+    //if clear events flag
+    writeByte(fh, 0xb800, 0x00, 0x6c8); //recieved something
+    //endif
+
+
+    writeByte(fh, 0xde24, 0x00, 0x1568); //peers
 
 
         //Seems to be that the walker actually reads the team data at 0xcc00? NOT TRUE
@@ -309,60 +305,33 @@ void walker_erase(FILE * fh){
 
 void walk_end(FILE * fh){
 
-        /* walker_info_t info
+    writeByte(fh, 0x00ED + 0x04, 0x00, 1);
+    writeByte(fh, 0x00ED + 0x0a, 0x00, 1);
+
+    uint8_t flagBuf[1];
+    readEeprom(fh, 0x00ED + 0x5b, flagBuf, 1);
+    writeByte(fh, 0x00ED + 0x5b, flagBuf[0] & ~(1<<1), 1); //Clear poke flag
+
+    writeByte(fh, 0x01ED + 0x04, 0x00, 1);
+    writeByte(fh, 0x01ED + 0x0a, 0x00, 1);
+
+    readEeprom(fh, 0x01ED + 0x5b, flagBuf, 1);
+    writeByte(fh, 0x01ED + 0x5b, flagBuf[0] & ~(1<<1), 1); //Clear poke flag
 
 
-               info.le_unk1 = 0;
-    info.le_unk3 = 0;
-    info.flags &= ~WALKER_INFO_FLAG_HAS_POKEMON;
-
-    pw_eeprom_write_walker_info(&info);
-
-    walker_info_cache = info;
-
-    pw_eeprom_set_area(PW_EEPROM_ADDR_CAUGHT_POKEMON_SUMMARY, 0, 0x64);
-    pw_eeprom_set_area(PW_EEPROM_ADDR_EVENT_LOG, 0, PW_EEPROM_SIZE_EVENT_LOG);
-    pw_eeprom_set_area(PW_EEPROM_ADDR_RECEIVED_BITFIELD, 0, 0x6c8);
-    pw_eeprom_set_area(PW_EEPROM_ADDR_MET_PEER_DATA, 0, 0x1568);
-    pw_eeprom_set_area(PW_EEPROM_ADDR_ROUTE_INFO, 0, 0x10);
-*/
-
-        writeByte(fh, 0x00ED + 0x04, 0x00, 1);
-        writeByte(fh, 0x00ED + 0x0a, 0x00, 1);
-
-        uint8_t flagBuf[1];
-        readEeprom(fh, 0x00ED + 0x5b, flagBuf, 1);
-        writeByte(fh, 0x00ED + 0x5b, flagBuf[0] & ~(1<<1), 1); //Clear poke flag
-
-        writeByte(fh, 0x01ED + 0x04, 0x00, 1);
-        writeByte(fh, 0x01ED + 0x0a, 0x00, 1);
-
-        readEeprom(fh, 0x01ED + 0x5b, flagBuf, 1);
-        writeByte(fh, 0x01ED + 0x5b, flagBuf[0] & ~(1<<1), 1); //Clear poke flag
+    //Checks
+    readEeprom(fh, 0x00ed, dataBuf, 128);
+    writeByte(fh, 0x00ed + 0x68, eeprom_check(dataBuf, 0x68), 1);
+    readEeprom(fh, 0x01ed, dataBuf, 128);
+    writeByte(fh, 0x01ed + 0x68, eeprom_check(dataBuf, 0x68), 1);
 
 
-        //Checks
-        readEeprom(fh, 0x00ed, dataBuf, 128);
-        writeByte(fh, 0x00ed + 0x68, eeprom_check(dataBuf, 0x68), 1);
-        readEeprom(fh, 0x01ed, dataBuf, 128);
-        writeByte(fh, 0x01ed + 0x68, eeprom_check(dataBuf, 0x68), 1);
-
-
-
-
-
-        writeByte(fh, 0xce8c, 0x00, 0x64); //Caught summary
-        writeByte(fh, 0xcf0c, 0x00, 3264); //Event log
-        writeByte(fh, 0xb800, 0x00, 0x6c8); //recieved something
-        writeByte(fh, 0xde24, 0x00, 0x1568); //peers
-        writeByte(fh, 0x8f00, 0x00, 0x10); //route info
-
-
-
-
-
+    writeByte(fh, 0xce8c, 0x00, 0x64); //Caught summary
+    writeByte(fh, 0xcf0c, 0x00, 3264); //Event log
+    writeByte(fh, 0xb800, 0x00, 0x6c8); //recieved something
+    writeByte(fh, 0xde24, 0x00, 0x1568); //peers
+    writeByte(fh, 0x8f00, 0x00, 0x10); //route info
 }
-
 
 
 

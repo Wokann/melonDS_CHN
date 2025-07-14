@@ -12,6 +12,8 @@
 uint16_t txToWalker(FILE * fh, char TxLen, char * TxData, char * RxData);
 
 
+//Some structs from mambas picowalker
+
 
 #endif
 

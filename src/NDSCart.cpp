@@ -1178,46 +1178,7 @@ long long timeToAcceptPacket = 0;
 u8 CartRetailIR::ReadIR(){
 	char tempBuf[0xB8];
 
-    setvbuf(stdout, NULL, _IONBF, 0);  // Turn off stdout buffering
 	u8 pointer = 0;
-
-
-
-
-        //THIS IS IMPORTANT FOR DIRECT MODE
-        if (Platform::IR_BypassDelay(UserData)){
-            /*
-            //No data ye
-            if (timeToAcceptPacket < 7){
-                timeToAcceptPacket++;
-                //printf("Packet init\n\n");
-                //timeToAcceptPacket = Platform::GetUSCount() + 10000;
-                return 0;
-            }
-            */
-
-            int len = Platform::IR_RecievePacket(tempBuf, sizeof(tempBuf), UserData);
-	        for(int i = 0; i < len; i++){
-			    RxBuf[pointer + i] = tempBuf[i];
-		    }
-		    pointer = pointer + len;
-
-
-
-            recvLen = pointer;
-	        if (recvLen == 0) return 0;
-            Platform::IR_LogPacket((char *) &RxBuf, recvLen, false, UserData);
-            return recvLen;
-        }
-
-
-
-
-
-
-
-
-
 
 
     int len = Platform::IR_RecievePacket(tempBuf, sizeof(tempBuf), UserData);
@@ -1238,8 +1199,17 @@ u8 CartRetailIR::ReadIR(){
 
 
         //keep trying to Rx until 3500us has passed
-		while((Platform::GetUSCount() - lastRxTime) < 3500){ //Maybe this can be fine tuned
-			len = Platform::IR_RecievePacket(tempBuf, sizeof(tempBuf), UserData);
+		while(true){ //Maybe this can be fine tuned
+
+            long long diff = Platform::GetUSCount() - lastRxTime;
+
+            if (diff > 3500) break;
+
+            //printf("Value: %llu \n", diff);
+            len = Platform::IR_RecievePacket(tempBuf, sizeof(tempBuf), UserData);
+
+            //printf("Len: %d\n", len);
+
 			if (len <= 0){ continue;}
 			else{
 
@@ -1255,14 +1225,6 @@ u8 CartRetailIR::ReadIR(){
 	recvLen = pointer;
 	if (recvLen == 0) return 0;
 
-/*
-	printf("\nRecieved %d Bytes \n", recvLen);
-	for (int i = 0; i < recvLen; i++){
-		printf("0x%02x ", (u8)RxBuf[i] ^ 0xaa);
-	}
-	printf("\n");
-
-*/
     Platform::IR_LogPacket((char *) &RxBuf, recvLen, false, UserData);
 	return recvLen;
 

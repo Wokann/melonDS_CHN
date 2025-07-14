@@ -15,12 +15,12 @@
 namespace melonDS::Platform
 {
 
-int IRMode = 0;
+
+
 //---------------------TCP = 2
 QTcpServer *server = nullptr;
 QTcpSocket *sock = nullptr;
 void IR_OpenTCP(void * userdata){
-
     int conn = 0;
     if (!server){
 
@@ -73,7 +73,6 @@ u8 IR_TCP_RecievePacket(char* data, int len, void * userdata){
     if (bytesRead > 0){
         return static_cast<int>(bytesRead);
     }
-    printf("Read 0 bytes\n");
     return 0;
 }
 
@@ -86,9 +85,6 @@ void IR_OpenSerialPort(void * userdata){
 
         EmuInstance* inst = (EmuInstance*)userdata;
         auto& cfg = inst->getLocalConfig();
-
-
-
 
         serial = new QSerialPort();
         serial->setPortName(cfg.GetQString("IR.SerialPortPath"));
@@ -134,76 +130,112 @@ u8 IR_Serial_RecievePacket(char* data, int len,void * userdata){
     return 0;
 }
 
-//Direct
 
 
+
+
+
+/*
+   -=+Direct Mode+=-
+
+   We have a bit of heavy lifting to do here. Mostly because the game does not really expect instant replies. For example, the game seems to issue one read (0x01) before two version checks (0x08). If this
+   read is populated with any data, it will brick the rest of the comms session. Usually this is not a problem because it would be incredibly hard to do in real life, and its possible that the internal
+   IR chip prevents this anyways. So here, we use a combination of the last packet recieve time and an 'init' sequence counter to establish when a "new" session is created. This helps us deal with file handling
+   as well.
+        - I could have maybe rewrote things to account for the version check in here, but that seemed annoying. (This IR implementation will never see 0x08 issued, or anything except 0x01 and 0x02).
+
+    Other than that, this mode just heavily relies on the pwalker implementation. Because we are the 'master' here but do not advertise, the init sequence with the pwalker emulator is a bit of a hack, but not
+    very complex or annoying.
+
+*/
+
+u64 lastPacketTime = 0;
 int init = 0;
 FileHandle * eh = nullptr;
 
 
-char directRxBuffer[0xb8];
-uint16_t directRxLength;
 
+
+/*
+    Because we will work on a send -> immediately recieve basis, we store the response to a Tx in the 'directRxBuffer'. This lets us easily read later when the game actually issues an 'IR Recieve'
+    This greatly simplifies the work that needs to be done by the walker emulator implementaiton.
+
+    'wait' exists to ensure compliance with timing specs. When 'waiting', the walker is sending NO DATA, allowing the game to recieve NO DATA for the minimum time (3.5ms).
+    We clear this when initing coms, or we have Txed and expect real data.
+
+    This is done to make NDSCart.cpp not have to check for direct mode, and essentially just enforces direct mode to comply with real timing specs.
+*/
+char directRxBuffer[0xb8];
+int16_t directRxLength;
+bool wait = 0; //Set this to wait for next Tx
+
+/*
+    Send the walker emulator a packet and store the response
+
+*/
 u8 IR_Direct_SendPacket(char* data, int len, void * userdata){
     EmuInstance* inst = (EmuInstance*)userdata;
     auto& cfg = inst->getLocalConfig();
-
-
-
-
     directRxLength = txToWalker((FILE *) eh, len, data, directRxBuffer);
-
-
-    //for (int i = 0; i < len; i++) printf("%02x ", (uint8_t) data[i]);
-
-    if (len > 1) init = 99;
-    return 0;
+    wait = false;
+    return 0; //Txing return is unused currently.
 }
-int on = 0;
+
+
+
+
+/*
+    The game starts by Rxing for an advertisement, and must do some things to establish a 'new connection' so we can properly handle the file.
+    Return: num of bytes recieved
+*/
 u8 IR_Direct_RecievePacket(char* data, int len,void * userdata){
     EmuInstance* inst = (EmuInstance*)userdata;
     auto& cfg = inst->getLocalConfig();
 
 
+    /*
+        Establish a new connection if we have no activity for a certain period of time.
+        Reset init sequence to 0. (Init sequence is essentially # of Rx Packets to ignore before we start comms)
+    */
+    if ((Platform::GetMSCount() - lastPacketTime) > 1000){
+        init = 0;
+        wait = 0;
+        lastPacketTime = Platform::GetMSCount();
+        eh = nullptr; //We expect the pwalker implementation to close this file (Currently anyways). However we need to invalidate that file pointer or else we will crash when operating on it again.
+        return 0;
+    }
 
-    //Let this be the detection of first comm
-    if (!eh) eh = OpenFile(cfg.GetString("IR.EEPROMPath"), FileMode::ReadWriteExisting);
 
-    char rtnLen = 0;
+    // All data has been sent, send 0 bytes to ensure the game can wait for timing.
+    if (wait) return 0;
 
-    //GAME STILL NEEDS TO INIT TO WALKER. SEND 0 BYTES TO WALKER, null list, return data buffer
+
+    // 10 = ignoreCount. probably can be 1 or 2 but doesnt really change much for the user.
     if (init < 10){
-
         init++;
         return 0;
     }
-    else if (on == 0){
-        on = 1;
-        printf("Starting Walker init sequence\n");
-        rtnLen = txToWalker((FILE *) eh, 0, data, data);
+    else if (init == 10){
+
+        init++;
+        printf("Starting walker IR sequence\n");
+        if (!eh) eh = OpenFile(cfg.GetString("IR.EEPROMPath"), FileMode::ReadWriteExisting);
+
+        wait = true;
+        //This is the first communication, so we need to 'stimulate' the walker sending an advertisement. rtnlen SHOULD be 1 here and the data SHOULD be the advertisement packet. (0xfc)
+        return txToWalker((FILE *) eh, 0, data, data);
     }
 
-    // GAME AT THIS POINT WILL HAVE SENT A PACKET. READ FROM BUFFER
-    if (directRxLength != 0){
 
+    /*
+        This is now the 'normal' communication. Keep in mind that the 'directRxLength' and 'directRxBuffer' will be properly manipulated by directTx.
+        Populate the correct buffer with the info
+    */
+    lastPacketTime = Platform::GetMSCount();
+    for (int i = 0; i < directRxLength; i++) data[i] = (char) directRxBuffer[i];
+    wait = true;
+    return directRxLength;
 
-        for (int i = 0; i < directRxLength; i++) data[i] = (char) directRxBuffer[i];
-        //memcpy(data, directRxBuffer, directRxLength);
-
-        //for (int i = 0; i < directRxLength; i++ ) fprintf(stderr, "%02x ", (uint8_t) directRxBuffer[i] ^ 0xaa);
-
-
-        /*rtnLen = directRxLength;
-
-
-        directRxLength = 0;
-*/
-
-        return directRxLength;
-    }
-    //printf("Recieved packet of len: %d data[0]: %02x\n", rtnLen, data[0]);
-
-    return rtnLen;
 }
 
 
@@ -218,7 +250,7 @@ u8 IR_SendPacket(char* data, int len, void * userdata){
     auto& cfg = inst->getLocalConfig();
 
 
-    IRMode = cfg.GetInt("IR.Mode");
+    int IRMode = cfg.GetInt("IR.Mode");
     //printf("Trying to send IR Packet in mode: %d\n", IRMode);
 
     if (IRMode == 0) return 0;
@@ -231,7 +263,7 @@ u8 IR_RecievePacket(char* data, int len, void * userdata){
     EmuInstance* inst = (EmuInstance*)userdata;
     auto& cfg = inst->getLocalConfig();
 
-    IRMode = cfg.GetInt("IR.Mode");
+    int IRMode = cfg.GetInt("IR.Mode");
     //printf("Trying to recieve IR Packet in mode: %d\n", IRMode);
 
     if (IRMode == 0) return 0;
@@ -271,19 +303,6 @@ void IR_LogPacket(char * data, int len, bool isTx, void * userdata){
     fflush((FILE *)fh);
 
 }
-
-
-bool IR_BypassDelay(void * userdata){
-    EmuInstance* inst = (EmuInstance*)userdata;
-    auto& cfg = inst->getLocalConfig();
-
-    IRMode = cfg.GetInt("IR.Mode");
-    if (IRMode == 3) return true;
-    return false;
-
-}
-
-
 
 
 }
