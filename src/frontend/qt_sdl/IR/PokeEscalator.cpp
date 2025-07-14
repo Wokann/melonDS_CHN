@@ -13,6 +13,30 @@ uint8_t dataBuf[0xb8];
 uint8_t decompBuf[0xb8];
 uint8_t writeBuf[0xb8];
 
+
+
+uint8_t eeprom_check(uint8_t * buf, size_t len);
+uint8_t eeprom_check(uint8_t * buf, size_t len){
+    uint8_t chk = 1;
+    for (size_t i = 0; i < len; i++) chk+= buf[i];
+    return chk;
+
+
+}
+
+
+/*
+void eeprom_reliable_write(uint16_t off1, uint16_t off2, uint8_t buf, size_t len){
+        readEeprom(fh, 0x00ed, dataBuf, 128);
+        writeByte(fh, 0x00ed + 0x68, eeprom_check(dataBuf, 0x68), 1);
+        readEeprom(fh, 0x01ed, dataBuf, 128);
+        writeByte(fh, 0x01ed + 0x68, eeprom_check(dataBuf, 0x68), 1);
+
+
+
+}   */
+
+
 //mamba
 uint16_t pw_ir_checksum_seeded(uint8_t *data, size_t len, uint16_t seed);
 uint16_t pw_ir_checksum_seeded(uint8_t *data, size_t len, uint16_t seed) {
@@ -176,6 +200,10 @@ void walk_start(FILE * fh){
         //Copy in trainer name
         writeEeprom(fh, 0x0ed + 0x48, dataBuf + 8 + 0x28 + 2 + 2 + 4, 16); //trainer name
 
+
+
+
+        writeEeprom(fh, 0x1ed + 0x48, dataBuf + 8 + 0x28 + 2 + 2 + 4, 16); //trainer name
         //??? flag
         writeByte(fh, 0x00ed, 0x00, 4);
         writeByte(fh, 0x00ed + 0x00, 0x01, 1); //unk0
@@ -186,6 +214,28 @@ void walk_start(FILE * fh){
         writeByte(fh, 0x00ed + 0x5b, 0x03, 1); //flags
         writeByte(fh, 0x00ed + 0x5c, 0x00, 1); //protover
         writeByte(fh, 0x00ed + 0x5f, 0x02, 1); //unk8
+
+
+        writeByte(fh, 0x01ed, 0x00, 4);
+        writeByte(fh, 0x01ed + 0x00, 0x01, 1); //unk0
+        writeByte(fh, 0x01ed + 0x04, 0x01, 1); //unk1
+        writeByte(fh, 0x01ed + 0x08, 0x08, 1); //unk2
+        writeByte(fh, 0x01ed + 0x0A, 0x08, 1); //unk3
+
+        writeByte(fh, 0x01ed + 0x5b, 0x03, 1); //flags
+        writeByte(fh, 0x01ed + 0x5c, 0x00, 1); //protover
+        writeByte(fh, 0x01ed + 0x5f, 0x02, 1); //unk8
+
+
+
+
+        //Checks
+        readEeprom(fh, 0x00ed, dataBuf, 128);
+        writeByte(fh, 0x00ed + 0x68, eeprom_check(dataBuf, 0x68), 1);
+        readEeprom(fh, 0x01ed, dataBuf, 128);
+        writeByte(fh, 0x01ed + 0x68, eeprom_check(dataBuf, 0x68), 1);
+
+
 }
 
 
@@ -197,11 +247,25 @@ void walker_erase(FILE * fh){
         writeByte(fh, 0x00ed, 0x00, 0x10);
         //Not unique IDENTITY data rn. picowalker-core/src/eeprom.c ~ line 140
         writeByte(fh, 0x00ed + 0x38, 0x00, 0x30);
+        writeByte(fh, 0x00ed + 0x5f, 0x02, 1); //unk8 THIS NEEDS TO STILL BE 0x02
+
+
 
 
         //Game does NOT CLEAR UNIQUE IDENTITY DATA
         writeByte(fh, 0x01ed, 0x00, 0x10);
         writeByte(fh, 0x01ed + 0x38, 0x00, 0x30);
+        writeByte(fh, 0x01ed + 0x5f, 0x02, 1); //unk8. THIS NEEDS TO STILL BE 0x02
+
+        //Populate checksums
+
+
+        readEeprom(fh, 0x00ed, dataBuf, 128);
+        writeByte(fh, 0x00ed + 0x68, eeprom_check(dataBuf, 0x68), 1);
+
+        readEeprom(fh, 0x01ed, dataBuf, 128);
+        writeByte(fh, 0x01ed + 0x68, eeprom_check(dataBuf, 0x68), 1);
+
 
 
 
@@ -269,6 +333,23 @@ void walk_end(FILE * fh){
         uint8_t flagBuf[1];
         readEeprom(fh, 0x00ED + 0x5b, flagBuf, 1);
         writeByte(fh, 0x00ED + 0x5b, flagBuf[0] & ~(1<<1), 1); //Clear poke flag
+
+        writeByte(fh, 0x01ED + 0x04, 0x00, 1);
+        writeByte(fh, 0x01ED + 0x0a, 0x00, 1);
+
+        readEeprom(fh, 0x01ED + 0x5b, flagBuf, 1);
+        writeByte(fh, 0x01ED + 0x5b, flagBuf[0] & ~(1<<1), 1); //Clear poke flag
+
+
+        //Checks
+        readEeprom(fh, 0x00ed, dataBuf, 128);
+        writeByte(fh, 0x00ed + 0x68, eeprom_check(dataBuf, 0x68), 1);
+        readEeprom(fh, 0x01ed, dataBuf, 128);
+        writeByte(fh, 0x01ed + 0x68, eeprom_check(dataBuf, 0x68), 1);
+
+
+
+
 
         writeByte(fh, 0xce8c, 0x00, 0x64); //Caught summary
         writeByte(fh, 0xcf0c, 0x00, 3264); //Event log
