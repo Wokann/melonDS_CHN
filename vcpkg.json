@@ -62,7 +62,8 @@
 					"features": ["gstreamer"],
 					"default-features": false
 				},
-				"qtsvg"
+				"qtsvg",
+				"qtserialport"
 			]
 		},
 		"qt5": {
@@ -78,7 +79,8 @@
 					"default-features": false
 				},
 				"qt5-multimedia",
-				"qt5-svg"
+				"qt5-svg",
+				"qt5-serialport"
 			]
 		}
 	}

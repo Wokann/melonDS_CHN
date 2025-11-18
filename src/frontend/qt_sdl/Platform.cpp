@@ -614,4 +614,5 @@ void* DynamicLibrary_LoadFunction(DynamicLibrary* lib, const char* name)
     return SDL_LoadFunction(lib, name);
 }
 
+
 }

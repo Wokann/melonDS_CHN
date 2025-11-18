@@ -468,7 +468,33 @@ void DynamicLibrary_Unload(DynamicLibrary* lib);
  * @return A pointer to the loaded function, or \c nullptr if the function could not be loaded.
  */
 void* DynamicLibrary_LoadFunction(DynamicLibrary* lib, const char* name);
-}
+
+
+
+/**
+ * Send a complete IR packet
+ * @param data data of the Tx buffer [0xb8]. It MAY have extraneous data.
+ * @param len the size of valid data.
+ * @return Unused, but may be useful in the future.
+ */
+u8 IR_SendPacket(char * data, int len, void * userdata);
+
+
+/**
+ * Recieve a COMPLETE or INCOMPLETE IR Packet. The frontend does NOT have to worry about which this is.
+ * @param data max 0xb8 bytes of incoming IR data
+ * @param len the size of VALID data in the "data" buffer.
+ * @return same as len.
+ */
+u8 IR_RecievePacket(char * data, int len, void * userdata);
+
+void IR_LogPacket(char * data, int len, bool isTx, void * userdata);
+
+
+
+
 
 }
+}
 #endif // PLATFORM_H
+

@@ -233,6 +233,15 @@ public:
 private:
     u32 IRVersion = 0;
     u8 IRCmd = 0;
+
+    u8 recvLen = 0;
+    char TxBuf[0xB8];
+    char RxBuf[0xB8];
+
+    //These two functions are slightly abstracted.
+    u8 SendIR(u8 len);
+    u8 ReadIR();
+
 };
 
 // CartRetailBT - Pok�mon Typing Adventure (SPI BT controller)
@@ -470,3 +479,4 @@ std::unique_ptr<CartCommon> ParseROM(std::unique_ptr<u8[]>&& romdata, u32 romlen
 }
 
 #endif
+
