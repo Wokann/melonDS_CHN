@@ -146,7 +146,7 @@ void FirmwareSettingsDialog::done(int r)
         if (!verifyMAC())
         {
             QMessageBox::critical(this, "无效MAC地址",
-                                  "您输入的MAC地址无效。它应包含6对十六进制数字，可选择分隔。");
+                                  "您输入的MAC地址无效。它应包含6对十六进制字节，可选择分隔。");
 
             return;
         }

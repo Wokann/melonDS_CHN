@@ -750,7 +750,7 @@ bool EmuInstance::loadState(const std::string& filename)
 
     if (!nds->DoSavestate(state.get()) || state->Error)
     { // If we couldn't load the savestate from the buffer...
-        Platform::Log(Platform::LogLevel::Error, "给模拟器读取即时文件失败 \"%s\"\n", filename.c_str());
+        Platform::Log(Platform::LogLevel::Error, "模拟器读取即时文件失败 \"%s\"\n", filename.c_str());
         return false;
     }
 
