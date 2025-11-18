@@ -220,9 +220,9 @@ void CheatsDialog::on_btnDeleteCode_clicked()
 void CheatsDialog::on_btnImportCheats_clicked()
 {
     QString file = QFileDialog::getOpenFileName(this,
-                                                "Select cheat database...",
+                                                "选择金手指数据库...",
                                                 emuDirectory,
-                                                "R4 cheat database (*.dat);;Any file (*.*)");
+                                                "R4金手指数据库 (*.dat);;Any file (*.*)");
 
     if (file.isEmpty()) return;
 
@@ -230,7 +230,7 @@ void CheatsDialog::on_btnImportCheats_clicked()
     if (importDB->Error)
     {
         QMessageBox::critical(this, "melonDS",
-                              "Failed to open this cheat database file.");
+                              "打开此金手指数据库失败。");
         delete importDB;
         return;
     }
@@ -238,7 +238,7 @@ void CheatsDialog::on_btnImportCheats_clicked()
     if (!importDB->FindGameCode(gameCode))
     {
         QMessageBox::critical(this, "melonDS",
-                              "No cheat codes were found in this database for the current game.");
+                              "此金手指数据库内未找到适配本游戏的金手指代码。");
         delete importDB;
         return;
     }
@@ -359,7 +359,7 @@ void CheatsDialog::on_btnSaveCode_clicked()
 
     if (ui->txtItemName->text().trimmed().isEmpty())
     {
-        QMessageBox::critical(this, "melonDS", "Error: no name entered.");
+        QMessageBox::critical(this, "melonDS", "错误：没有输入名称。");
         return;
     }
 
@@ -383,7 +383,7 @@ void CheatsDialog::on_btnSaveCode_clicked()
         auto codeconv = convertCodeInput();
         if (codeconv.empty())
         {
-            QMessageBox::critical(this, "melonDS", "Error: the code entered is empty or invalid.");
+            QMessageBox::critical(this, "melonDS", "错误：输入的代码是空的或格式错误。");
             return;
         }
 
@@ -464,7 +464,7 @@ void CheatsDialog::populateCheatInfo()
         ui->txtItemDesc->clear();
         ui->txtItemDesc->setReadOnly(true);
 
-        ui->chkItemOption->setText("Enabled");
+        ui->chkItemOption->setText("已启用");
         ui->chkItemOption->setChecked(false);
         ui->chkItemOption->setEnabled(false);
 
@@ -496,7 +496,7 @@ void CheatsDialog::populateCheatInfo()
         ui->txtItemDesc->setText(QString::fromStdString(cat->Description));
         ui->txtItemDesc->setReadOnly(true);
 
-        ui->chkItemOption->setText("Only allow one code enabled");
+        ui->chkItemOption->setText("此类别下的代码为单选启用的类型");
         ui->chkItemOption->setChecked(cat->OnlyOneCodeEnabled);
         ui->chkItemOption->setEnabled(false);
 
@@ -519,7 +519,7 @@ void CheatsDialog::populateCheatInfo()
         ui->txtItemDesc->setText(QString::fromStdString(code->Description));
         ui->txtItemDesc->setReadOnly(true);
 
-        ui->chkItemOption->setText("Enabled");
+        ui->chkItemOption->setText("已启用");
         ui->chkItemOption->setChecked(code->Enabled);
         ui->chkItemOption->setEnabled(false);
 

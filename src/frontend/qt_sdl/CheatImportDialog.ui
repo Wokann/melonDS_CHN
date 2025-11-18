@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Import cheat codes - melonDS</string>
+   <string>导入金手指代码 - melonDS</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout_3">
    <item>
@@ -33,7 +33,7 @@
        <item>
         <widget class="QCheckBox" name="chkShowAllMatches">
          <property name="text">
-          <string>Show all game code matches</string>
+          <string>显示所有匹配 游戏序列号 的条目</string>
          </property>
         </widget>
        </item>
@@ -43,14 +43,14 @@
        <item>
         <widget class="QCheckBox" name="chkRemoveOld">
          <property name="text">
-          <string>Clear cheat file before import</string>
+          <string>导入前清理已有的金手指数据</string>
          </property>
         </widget>
        </item>
        <item>
         <widget class="QLabel" name="label_8">
          <property name="text">
-          <string>Check the cheat codes to import in the list below.</string>
+          <string>请在列表中选择你要导入的金手指代码。</string>
          </property>
         </widget>
        </item>
@@ -80,7 +80,7 @@
        <item>
         <widget class="QGroupBox" name="gbDatabaseInfo">
          <property name="title">
-          <string>Database</string>
+          <string>数据库</string>
          </property>
          <layout class="QVBoxLayout" name="verticalLayout_4">
           <item>
@@ -92,7 +92,7 @@
              </sizepolicy>
             </property>
             <property name="text">
-             <string>super duper cheat database by epic haxor team</string>
+             <string>超级无敌金手指数据库——来自史诗级黑客团队</string>
             </property>
             <property name="textFormat">
              <enum>Qt::TextFormat::PlainText</enum>
@@ -114,13 +114,13 @@
           </sizepolicy>
          </property>
          <property name="title">
-          <string>Selected game</string>
+          <string>选中的游戏</string>
          </property>
          <layout class="QFormLayout" name="formLayout">
           <item row="0" column="0">
            <widget class="QLabel" name="label_2">
             <property name="text">
-             <string>Name:</string>
+             <string>名称:</string>
             </property>
            </widget>
           </item>
@@ -133,7 +133,7 @@
              </sizepolicy>
             </property>
             <property name="text">
-             <string>Super Mario Odyssey DS Edition</string>
+             <string>超级马里奥 奥德赛 DS版</string>
             </property>
             <property name="textFormat">
              <enum>Qt::TextFormat::PlainText</enum>
@@ -146,7 +146,7 @@
           <item row="1" column="0">
            <widget class="QLabel" name="label_3">
             <property name="text">
-             <string>Game code:</string>
+             <string>游戏序列号:</string>
             </property>
            </widget>
           </item>
@@ -163,7 +163,7 @@
           <item row="2" column="0">
            <widget class="QLabel" name="label_5">
             <property name="text">
-             <string>Checksum:</string>
+             <string>校验码:</string>
             </property>
            </widget>
           </item>
@@ -189,7 +189,7 @@
           </sizepolicy>
          </property>
          <property name="title">
-          <string>Selected code</string>
+          <string>选中的代码</string>
          </property>
          <layout class="QFormLayout" name="formLayout_3">
           <item row="0" column="0">
@@ -201,7 +201,7 @@
              </sizepolicy>
             </property>
             <property name="text">
-             <string>Name:</string>
+             <string>名称:</string>
             </property>
             <property name="alignment">
              <set>Qt::AlignmentFlag::AlignLeading|Qt::AlignmentFlag::AlignLeft|Qt::AlignmentFlag::AlignTop</set>
@@ -217,7 +217,7 @@
              </sizepolicy>
             </property>
             <property name="text">
-             <string>super duper code</string>
+             <string>超级无敌代码</string>
             </property>
             <property name="textFormat">
              <enum>Qt::TextFormat::PlainText</enum>
@@ -236,7 +236,7 @@
              </sizepolicy>
             </property>
             <property name="text">
-             <string>Description:</string>
+             <string>描述:</string>
             </property>
             <property name="alignment">
              <set>Qt::AlignmentFlag::AlignLeading|Qt::AlignmentFlag::AlignLeft|Qt::AlignmentFlag::AlignTop</set>
@@ -252,7 +252,7 @@
              </sizepolicy>
             </property>
             <property name="text">
-             <string>this code is absolutely epic</string>
+             <string>这代码真是超棒的</string>
             </property>
             <property name="textFormat">
              <enum>Qt::TextFormat::PlainText</enum>
@@ -271,7 +271,7 @@
              </sizepolicy>
             </property>
             <property name="text">
-             <string>Status:</string>
+             <string>状态:</string>
             </property>
            </widget>
           </item>
@@ -284,7 +284,7 @@
              </sizepolicy>
             </property>
             <property name="text">
-             <string>enabled</string>
+             <string>已禁用</string>
             </property>
             <property name="textFormat">
              <enum>Qt::TextFormat::PlainText</enum>
@@ -300,7 +300,7 @@
              </sizepolicy>
             </property>
             <property name="text">
-             <string>Code:</string>
+             <string>代码:</string>
             </property>
             <property name="alignment">
              <set>Qt::AlignmentFlag::AlignLeading|Qt::AlignmentFlag::AlignLeft|Qt::AlignmentFlag::AlignTop</set>
