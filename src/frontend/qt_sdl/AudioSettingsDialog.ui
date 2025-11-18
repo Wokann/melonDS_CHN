@@ -65,7 +65,7 @@
           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;将输出音量与 DSi 硬件音量同步。&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
          </property>
          <property name="text">
-          <string>Sync with DSi volume</string>
+          <string>与DSi音量同步</string>
          </property>
         </widget>
       </item>

@@ -130,7 +130,7 @@ FileHandle* OpenFile(const std::string& path, FileMode mode)
 {
     if ((mode & (FileMode::ReadWrite | FileMode::Append)) == FileMode::None)
     { // If we aren't reading or writing, then we can't open the file
-        Log(LogLevel::Error, "尝试打开 \"%s\" 以非读非写模式 (文件模式 0x%x)\n", path.c_str(), mode);
+        Log(LogLevel::Error, "尝试以非读、非写模式 (文件模式 0x%x)打开 \"%s\" \n", path.c_str(), mode);
         return nullptr;
     }
 
@@ -146,11 +146,11 @@ FileHandle* OpenFile(const std::string& path, FileMode mode)
 
         if (file)
         {
-            Log(LogLevel::Debug, "打开 \"%s\" 以文件模式 0x%x (有效模式 \"%s\")\n", path.c_str(), mode, modeString.c_str());
+            Log(LogLevel::Debug, "以文件模式 0x%x (有效模式 \"%s\")打开 \"%s\" \n", path.c_str(), mode, modeString.c_str());
             return reinterpret_cast<FileHandle *>(file);
         }
     }
-    Log(LogLevel::Warn, "打开 \"%s\" 失败，以文件模式 0x%x (有效模式 \"%s\")\n", path.c_str(), mode, modeString.c_str());
+    Log(LogLevel::Warn, "以文件模式 0x%x (有效模式 \"%s\")打开 \"%s\" 失败，\n", path.c_str(), mode, modeString.c_str());
     return nullptr;
 }
 

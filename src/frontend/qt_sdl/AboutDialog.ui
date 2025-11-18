@@ -131,7 +131,7 @@
           <bool>true</bool>
          </property>
          <property name="text">
-          <string>由Arisotura, melonDS团队&lt;a href=&quot;https://github.com/melonDS-emu/melonDS/graphs/contributors&quot;&gt;及贡献者们&lt;/a&gt;制作。&lt;br /&gt;(本汉化版由卧看微尘/wokann翻译)</string>
+          <string>由Arisotura, melonDS团队&lt;a href=&quot;https://github.com/melonDS-emu/melonDS/graphs/contributors&quot;&gt;及贡献者们&lt;/a&gt;制作。&lt;br /&gt;(本&lt;a href=&quot;https://github.com/Wokann/melonDS_CHN&quot;&gt;汉化版&lt;/a&gt;由卧看微尘/wokann翻译)</string>
          </property>
          <property name="openExternalLinks">
           <bool>true</bool>

@@ -192,7 +192,7 @@
        <item row="0" column="0" colspan="3">
         <widget class="QCheckBox" name="chkExternalBIOS">
          <property name="whatsThis">
-          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;允许使用用户自行提供的BIOS和固件(firmware)转储。&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;允许使用用户自行转储的BIOS和固件(firmware)。&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
          </property>
          <property name="text">
           <string>使用外部 BIOS/固件(firmware) 文件</string>
@@ -209,62 +209,62 @@
        <item row="14" column="2">
         <widget class="QPushButton" name="btnDSiSDFolderBrowse">
          <property name="text">
-          <string>Browse...</string>
+          <string>浏览...</string>
          </property>
         </widget>
        </item>
        <item row="11" column="1">
         <widget class="QPathInput" name="txtDSiSDPath">
          <property name="whatsThis">
-          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;SD image file for emulating the DSi's SD card. A blank image file will be created if it doesn't already exist.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;用于模拟DSi的SD卡的SD镜像文件。若文件未存在，将创建一个空白的镜像。&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
          </property>
         </widget>
        </item>
        <item row="12" column="1">
         <widget class="QComboBox" name="cbxDSiSDSize">
          <property name="whatsThis">
-          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Size of the SD image.&lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;p&gt;If set to Auto:&lt;/p&gt;&lt;p&gt;* if an image file exists, the volume size will be that of the image file&lt;/p&gt;&lt;p&gt;* if no image file exists and folder sync is enabled, the volume size will be determined from the synced folder's contents&lt;/p&gt;&lt;p&gt;* otherwise, the volume size will default to 512 MB&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;SD卡镜像的大小。&lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;p&gt;在自动模式下：&lt;/p&gt;&lt;p&gt;* 若镜像文件存在，则SD卡分卷大小将等同于镜像文件大小&lt;/p&gt;&lt;p&gt;* 若镜像文件不存在且启用了同步SD卡镜像至文件夹，则SD卡分卷大小将根据同步文件夹的内容确定&lt;/p&gt;&lt;p&gt;* 否则，SD卡分卷大小将默认设置为512 MB&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
          </property>
         </widget>
        </item>
        <item row="10" column="0" colspan="3">
         <widget class="QCheckBox" name="cbDSiSDEnable">
          <property name="whatsThis">
-          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Simulate a SD card being inserted in the DSi's SD slot.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;模拟一张SD卡插入了DSi的SD卡槽内。&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
          </property>
          <property name="text">
-          <string>Enable DSi SD card</string>
+          <string>启动DSi的SD卡</string>
          </property>
         </widget>
        </item>
        <item row="4" column="2">
         <widget class="QPushButton" name="btnDSiNANDBrowse">
          <property name="text">
-          <string>Browse...</string>
+          <string>浏览...</string>
          </property>
         </widget>
        </item>
        <item row="3" column="1">
         <widget class="QPathInput" name="txtDSiFirmwarePath">
          <property name="whatsThis">
-          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;DSi-mode firmware (used for DS-mode backwards compatibility)&lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;p&gt;Size should be 128 KB&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;DSi-模式 固件(firmware) (用于兼容 DS-模式)&lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;p&gt;大小应为128 KB&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
          </property>
         </widget>
        </item>
        <item row="14" column="0">
         <widget class="QCheckBox" name="cbDSiSDFolder">
          <property name="whatsThis">
-          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Sync the emulated SD card to the given folder. The folder's contents will be copied to the SD image, and any change made to the SD image will be reflected to the folder.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;同步虚拟SD卡内容至指定文件夹。文件夹的内容将被复制到SD卡镜像，对SD卡镜像所做的任何更改都将同步到文件夹中。&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
          </property>
          <property name="text">
-          <string>Sync SD to folder:</string>
+          <string>同步SD卡镜像至文件夹:</string>
          </property>
         </widget>
        </item>
        <item row="4" column="1">
         <widget class="QPathInput" name="txtDSiNANDPath">
          <property name="whatsThis">
-          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;DSi NAND dump&lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;p&gt;Should have 'nocash footer' at the end&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;DSi NAND 转储&lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;p&gt;文件末尾应当存在'nocash footer'&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
          </property>
         </widget>
        </item>
@@ -285,59 +285,59 @@
        <item row="0" column="0" colspan="3">
         <widget class="QLabel" name="label_15">
          <property name="text">
-          <string>DSi mode requires external DSi BIOS/firmware/NAND</string>
+          <string>DSi-模式必须额外提供 DSi BIOS/固件(firmware)/NAND</string>
          </property>
         </widget>
        </item>
        <item row="5" column="0" colspan="3">
         <widget class="QCheckBox" name="cbDSiFullBIOSBoot">
          <property name="whatsThis">
-          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Boot the system from scratch by running the full boot ROMs, instead of starting with the second-stage loader. Requires a full BIOS/bootROM dump.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;通过运行完整的 bootROM 从头引导系统，而不是从第二阶段引导程序开始。需要完整的 BIOS/bootROM 转储。&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
          </property>
          <property name="text">
-          <string>Full BIOS boot</string>
+          <string>完整BIOS引导</string>
          </property>
         </widget>
        </item>
        <item row="2" column="1">
         <widget class="QPathInput" name="txtDSiBIOS7Path">
          <property name="whatsThis">
-          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;DSi-mode ARM7 BIOS&lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;p&gt;Size should be 64 KB&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;DSi-模式 ARM7 BIOS&lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;p&gt;大小应为64 KB&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
          </property>
         </widget>
        </item>
        <item row="12" column="0">
         <widget class="QLabel" name="label_13">
          <property name="text">
-          <string>Image size:</string>
+          <string>镜像大小:</string>
          </property>
         </widget>
        </item>
        <item row="14" column="1">
         <widget class="QLineEdit" name="txtDSiSDFolder">
          <property name="whatsThis">
-          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Sync the emulated SD card to the given folder. The folder's contents will be copied to the SD image, and any change made to the SD image will be reflected to the folder.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;同步虚拟SD卡内容至指定文件夹。文件夹的内容将被复制到SD卡镜像，对SD卡镜像所做的任何更改都将同步到文件夹中。&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
          </property>
         </widget>
        </item>
        <item row="3" column="0">
         <widget class="QLabel" name="label_7">
          <property name="text">
-          <string>DSi firmware:</string>
+          <string>DSi 固件(firmware):</string>
          </property>
         </widget>
        </item>
        <item row="11" column="0">
         <widget class="QLabel" name="label_10">
          <property name="text">
-          <string>SD card image:</string>
+          <string>SD卡镜像:</string>
          </property>
         </widget>
        </item>
        <item row="2" column="2">
         <widget class="QPushButton" name="btnDSiBIOS7Browse">
          <property name="text">
-          <string>Browse...</string>
+          <string>浏览...</string>
          </property>
         </widget>
        </item>
@@ -430,7 +430,7 @@
        <item row="1" column="0">
         <widget class="QLabel" name="label_9">
          <property name="text">
-          <string>最大JIT块大小：</string>
+          <string>最大JIT块大小:</string>
          </property>
         </widget>
        </item>
@@ -529,7 +529,7 @@
        <item row="2" column="1">
         <widget class="QComboBox" name="cbxDLDISize">
          <property name="whatsThis">
-          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;SD卡镜像的大小&lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;p&gt;如果设置为自动：&lt;/p&gt;&lt;p&gt;* 那么当镜像文件存在时，SD卡分卷大小将与镜像文件一致&lt;/p&gt;&lt;p&gt;* 当镜像文件不存在且启用了同步SD卡镜像至文件夹，则SD卡分卷大小将根据同步文件夹的内容确定&lt;/p&gt;&lt;p&gt;* 否则，SD卡分卷大小将默认为512MB。&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;SD卡镜像的大小&lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;p&gt;在自动模式下：&lt;/p&gt;&lt;p&gt;* 若镜像文件存在，则SD卡分卷大小将等同于镜像文件大小&lt;/p&gt;&lt;p&gt;* 若镜像文件不存在且启用了同步SD卡镜像至文件夹，则SD卡分卷大小将根据同步文件夹的内容确定&lt;/p&gt;&lt;p&gt;* 否则，SD卡分卷大小将默认设置为512 MB&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
          </property>
         </widget>
        </item>
