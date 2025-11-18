@@ -153,7 +153,9 @@ void EmuThread::run()
 
     while (emuStatus != emuStatus_Exit)
     {
-        MPInterface::Get().Process();
+        if (emuInstance->instanceID == 0)
+            MPInterface::Get().Process();
+
         emuInstance->inputProcess();
 
         if (emuInstance->hotkeyPressed(HK_FrameLimitToggle)) emit windowLimitFPSChange();
@@ -264,9 +266,6 @@ void EmuThread::run()
                 emuInstance->nds->SetLidClosed(lid);
                 emuInstance->osdAddMessage(0, lid ? "盒盖" : "开盖");
             }
-
-            // microphone input
-            emuInstance->micProcess();
 
             // auto screen layout
             {
