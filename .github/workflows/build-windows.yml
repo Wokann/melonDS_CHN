@@ -23,8 +23,10 @@ jobs:
         arch:
           - name: x86_64
             msystem: ucrt64
+            packages: mingw-w64-ucrt-x86_64-gcc mingw-w64-ucrt-x86_64-cmake mingw-w64-ucrt-x86_64-ninja
           - name: aarch64
             msystem: clangarm64
+            packages: mingw-w64-clang-aarch64-toolchain mingw-w64-clang-aarch64-cmake mingw-w64-clang-aarch64-ninja
     defaults:
       run:
         shell: msys2 {0}
@@ -38,7 +40,7 @@ jobs:
       with:
         msystem: ${{ matrix.arch.msystem }}
         update: true
-        pacboy: gcc:p cmake:p ninja:p make:p
+        install: git ${{ matrix.arch.packages }}
     - name: Restore vcpkg cache
       uses: actions/cache/restore@v4
       with:
