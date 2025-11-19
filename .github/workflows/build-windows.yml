@@ -18,6 +18,13 @@ env:
 jobs:
   build:
     runs-on: windows-2025
+    strategy:
+      matrix:
+        arch:
+          - name: x86_64
+            msystem: ucrt64
+          - name: aarch64
+            msystem: clangarm64
     defaults:
       run:
         shell: msys2 {0}
@@ -29,29 +36,29 @@ jobs:
     - name: Set up MSYS2
       uses: msys2/setup-msys2@v2
       with:
-        msystem: ucrt64
+        msystem: ${{ matrix.arch.msystem }}
         update: true
         pacboy: gcc:p cmake:p ninja:p make:p
     - name: Restore vcpkg cache
       uses: actions/cache/restore@v4
       with:
         path: ${{ github.workspace }}/vcpkg_cache
-        key: vcpkg-x86_64-mingw-${{ hashFiles('vcpkg.json') }}
-        restore-keys: vcpkg-x86_64-mingw-
+        key: vcpkg-${{ matrix.arch.name }}-mingw-${{ hashFiles('vcpkg.json') }}
+        restore-keys: vcpkg-${{ matrix.arch.name }}-mingw-
     - name: Set up vcpkg
       uses: lukka/run-vcpkg@v11
       with:
         vcpkgJsonGlob: vcpkg.json
     - name: Configure
-      run: cmake --preset=release-mingw-x86_64 -DMELONDS_EMBED_BUILD_INFO=ON
+      run: cmake --preset=release-mingw-${{ matrix.arch.name }} -DMELONDS_EMBED_BUILD_INFO=ON
     - name: Build
-      run: cmake --build --preset=release-mingw-x86_64
+      run: cmake --build --preset=release-mingw-${{ matrix.arch.name }}
     - uses: actions/upload-artifact@v4
       with:
-        name: melonDS-windows-x86_64
-        path: .\build\release-mingw-x86_64\melonDS.exe
+        name: melonDS-windows-${{ matrix.arch.name }}
+        path: .\build\release-mingw-${{ matrix.arch.name }}\melonDS.exe
     - name: Save vcpkg cache
       uses: actions/cache/save@v4
       with:
         path: ${{ github.workspace }}/vcpkg_cache
-        key: vcpkg-x86_64-mingw-${{ hashFiles('vcpkg.json') }}
+        key: vcpkg-${{ matrix.arch.name }}-mingw-${{ hashFiles('vcpkg.json') }}
