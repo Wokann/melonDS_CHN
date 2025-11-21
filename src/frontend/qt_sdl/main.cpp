@@ -370,7 +370,7 @@ int main(int argc, char** argv)
             if (romArchivePath.has_value())
                 return {*romPath, *romArchivePath};
 
-            const QStringList path = win->splitArchivePath(*romPath, true);
+            const QStringList path = win->splitArchivePath(QUrl::fromLocalFile(*romPath).toLocalFile(), true);
             if (path.size() > 1) memberSyntaxUsed = true;
             return path;
         };
