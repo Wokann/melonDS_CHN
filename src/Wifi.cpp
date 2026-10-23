@@ -1732,16 +1732,20 @@ bool Wifi::CheckRX(int type) // 0=regular 1=MP replies 2=MP host frames
 
 void Wifi::MSTimer()
 {
+    bool beaconCounterReloaded = false;
     if (IOPORT(W_USCompareCnt))
     {
         if ((USCounter & ~0x3FF) == USCompare)
         {
             BlockBeaconIRQ14 = false;
             SetIRQ14(0);
+            beaconCounterReloaded = true;
         }
     }
 
-    if (IOPORT(W_BeaconCount1) != 0)
+    // USCOMPARE just reloaded this counter. Decrementing it in the same
+    // tick would move subsequent beacons one TU (1024 us) early.
+    if (!beaconCounterReloaded && IOPORT(W_BeaconCount1) != 0)
     {
         IOPORT(W_BeaconCount1)--;
         if (IOPORT(W_BeaconCount1) == 0) SetIRQ14(1);
